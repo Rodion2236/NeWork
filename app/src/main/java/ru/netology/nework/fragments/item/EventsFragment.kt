@@ -1,60 +1,170 @@
 package ru.netology.nework.fragments.item
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.PopupMenu
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.netology.nework.R
+import ru.netology.nework.data.local.TokenStorage
+import ru.netology.nework.databinding.FragmentEventBinding
+import ru.netology.nework.domain.model.Event
+import ru.netology.nework.presentation.events.EventsUiState
+import ru.netology.nework.presentation.events.EventsViewModel
+import ru.netology.nework.presentation.events.adapter.EventAdapter
+import ru.netology.nework.util.VideoPlayerManager
+import javax.inject.Inject
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+@AndroidEntryPoint
+class EventsFragment : Fragment(R.layout.fragment_event) {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [EventFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class EventFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private val viewModel: EventsViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    @Inject
+    lateinit var playerManager: VideoPlayerManager
+
+    @Inject
+    lateinit var tokenStorage: TokenStorage
+
+    private var _binding: FragmentEventBinding? = null
+    private val binding get() = _binding!!
+
+    private val adapter: EventAdapter by lazy {
+        EventAdapter(
+            onLikeClick = { id, liked -> viewModel.toggleLike(id, liked) },
+            onEventClick = { event -> openEventDetail(event) },
+            onMenuClick = { event, anchor -> showEventMenu(event, anchor) },
+            playerManager = playerManager
+        )
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentEventBinding.bind(view)
+
+        setupRecyclerView()
+        setupObservers()
+        setupClicks()
+    }
+
+    private fun setupRecyclerView() {
+        binding.recyclerViewEvent.adapter = adapter
+
+        lifecycleScope.launch {
+            adapter.loadStateFlow.collect { loadState ->
+                when (loadState.refresh) {
+                    is LoadState.Loading -> binding.swipeRefreshEvent.isRefreshing = true
+                    is LoadState.Error -> {
+                        binding.swipeRefreshEvent.isRefreshing = false
+                        Snackbar.make(
+                            binding.root,
+                            R.string.connection_error,
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> binding.swipeRefreshEvent.isRefreshing = false
+                }
+            }
+        }
+
+        binding.recyclerViewEvent.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    playerManager.pause()
+                }
+            }
+        })
+    }
+
+    private fun setupObservers() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.events.collect { pagingData ->
+                    adapter.submitData(pagingData)
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is EventsUiState.Error -> Snackbar.make(
+                            binding.root,
+                            getString(R.string.connection_error),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                        is EventsUiState.Success -> Snackbar.make(
+                            binding.root,
+                            getString(R.string.event_action_success),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                        else -> {}
+                    }
+                }
+            }
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_event, container, false)
+    private fun setupClicks() {
+        binding.swipeRefreshEvent.setOnRefreshListener {
+            adapter.refresh()
+        }
+
+        binding.buttonNewEvent.setOnClickListener {
+            findNavController().navigate(R.id.action_mainFragment_to_newEventFragment)
+        }
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment EventFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            EventFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    private fun showEventMenu(event: Event, anchor: View) {
+        val currentUserId = tokenStorage.getUserId()
+        if (event.authorId != currentUserId) {
+            return
+        }
+
+        PopupMenu(requireContext(), anchor).apply {
+            inflate(R.menu.event_options)
+
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.edit -> {
+                        // TODO: Навигация на редактирование
+                    }
+                    R.id.delete -> {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.delete)
+                            .setMessage(R.string.confirm_delete_event)
+                            .setPositiveButton(R.string.ok) { _, _ ->
+                                viewModel.deleteEvent(event.id)
+                            }
+                            .setNegativeButton(R.string.cancel, null)
+                            .show()
+                    }
                 }
+                true
             }
+            show()
+        }
+    }
+
+    private fun openEventDetail(event: Event) {
+        // TODO: Навигация на детали события
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+        playerManager.release()
     }
 }

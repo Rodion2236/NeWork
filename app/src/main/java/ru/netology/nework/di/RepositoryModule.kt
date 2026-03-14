@@ -5,8 +5,10 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import ru.netology.nework.data.repository.AuthRepositoryImpl
+import ru.netology.nework.data.repository.EventsRepositoryImpl
 import ru.netology.nework.data.repository.PostsRepositoryImpl
 import ru.netology.nework.domain.repository.AuthRepository
+import ru.netology.nework.domain.repository.EventsRepository
 import ru.netology.nework.domain.repository.PostsRepository
 import javax.inject.Singleton
 
@@ -21,4 +23,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPostsRepository(impl: PostsRepositoryImpl): PostsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindEventsRepository(impl: EventsRepositoryImpl): EventsRepository
 }

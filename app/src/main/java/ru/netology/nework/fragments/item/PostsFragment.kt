@@ -16,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.netology.nework.R
+import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.databinding.FragmentPostsBinding
 import ru.netology.nework.domain.model.Post
 import ru.netology.nework.presentation.feed.FeedUiState
@@ -31,6 +32,9 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
 
     @Inject
     lateinit var playerManager: VideoPlayerManager
+
+    @Inject
+    lateinit var tokenStorage: TokenStorage
 
     private var _binding: FragmentPostsBinding? = null
     private val binding get() = _binding!!
@@ -114,7 +118,6 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
     }
 
     private fun setupClicks() {
-        // Swipe to refresh
         binding.swipeRefresh.setOnRefreshListener {
             adapter.refresh()
         }
@@ -125,6 +128,11 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
     }
 
     private fun showPostMenu(post: Post, anchor: View) {
+        val currentUserId = tokenStorage.getUserId()
+        if (post.authorId != currentUserId) {
+            return
+        }
+
         PopupMenu(requireContext(), anchor).apply {
             inflate(R.menu.post_options)
 

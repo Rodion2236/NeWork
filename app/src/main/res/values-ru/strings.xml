@@ -79,4 +79,7 @@
     <string name="select_dates">Выберите даты</string>
     <string name="confirm_delete_post">Подтвердить удаление поста?</string>
     <string name="post_deleted">Пост удален</string>
+    <string name="event_action_success">Действие выполнено</string>
+    <string name="confirm_delete_event">Вы уверены, что хотите удалить это событие?</string>
+    <string name="like_count">%d</string>
 </resources>

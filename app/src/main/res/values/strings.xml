@@ -78,6 +78,9 @@
     <string name="add_job">add job</string>
     <string name="select_start_date">select_start_date</string>
     <string name="select_dates">select_dates</string>
-    <string name="confirm_delete_post">confirm delete post?</string>
+    <string name="confirm_delete_post">Confirm delete post?</string>
     <string name="post_deleted">Post deleted</string>
+    <string name="event_action_success">Event action success</string>
+    <string name="confirm_delete_event">Confirm delete event?</string>
+    <string name="like_count">%d</string>
 </resources>

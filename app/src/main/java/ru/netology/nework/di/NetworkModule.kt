@@ -9,6 +9,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.netology.nework.data.remote.api.AuthApi
+import ru.netology.nework.data.remote.api.EventsApi
 import ru.netology.nework.data.remote.api.PostsApi
 import ru.netology.nework.data.remote.interceptor.ApiKeyInterceptor
 import javax.inject.Singleton
@@ -51,4 +52,8 @@ object NetworkModule {
     @Provides
     fun providePostsApi(retrofit: Retrofit): PostsApi =
         retrofit.create(PostsApi::class.java)
+
+    @Provides
+    fun provideEventsApi(retrofit: Retrofit): EventsApi =
+        retrofit.create(EventsApi::class.java)
 }

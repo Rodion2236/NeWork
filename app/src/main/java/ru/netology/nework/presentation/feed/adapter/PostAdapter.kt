@@ -1,8 +1,10 @@
 package ru.netology.nework.presentation.feed.adapter
 
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -10,6 +12,7 @@ import ru.netology.nework.R
 import ru.netology.nework.databinding.CardPostBinding
 import ru.netology.nework.domain.model.AttachmentType
 import ru.netology.nework.domain.model.Post
+import ru.netology.nework.util.DateUtils
 import ru.netology.nework.util.VideoPlayerManager
 import ru.netology.nework.util.clearImage
 import ru.netology.nework.util.load
@@ -99,6 +102,14 @@ abstract class PostViewHolder(
             onMenuClick(post, view)
         }
     }
+
+    protected fun enableLinks(content: TextView) {
+        content.movementMethod = LinkMovementMethod.getInstance()
+        content.setOnTouchListener { v, event ->
+            v.onTouchEvent(event)
+            false
+        }
+    }
 }
 
 class TextPostViewHolder(
@@ -111,10 +122,13 @@ class TextPostViewHolder(
     override fun bind(post: Post) {
         binding.authorName.text = post.author
         binding.content.text = post.content
+        binding.datePublication.text = DateUtils.formatTimestamp(post.published)
         binding.imageContent.visibility = View.GONE
         binding.videoContent.visibility = View.GONE
         binding.audioContent.visibility = View.GONE
         binding.buttonLike.isChecked = post.likedByMe
+        binding.likeCount.text = post.likeCount.toString()
+        enableLinks(binding.content)
         setupClicks(post)
     }
 }
@@ -129,6 +143,7 @@ class ImagePostViewHolder(
     override fun bind(post: Post) {
         binding.authorName.text = post.author
         binding.content.text = post.content
+        binding.datePublication.text = DateUtils.formatTimestamp(post.published)
 
         loadAvatar(post.authorAvatar)
 
@@ -144,7 +159,8 @@ class ImagePostViewHolder(
         )
 
         binding.buttonLike.isChecked = post.likedByMe
-
+        binding.likeCount.text = post.likeCount.toString()
+        enableLinks(binding.content)
         setupClicks(post)
     }
 
@@ -167,6 +183,7 @@ class VideoPostViewHolder(
     override fun bind(post: Post) {
         binding.authorName.text = post.author
         binding.content.text = post.content
+        binding.datePublication.text = DateUtils.formatTimestamp(post.published)
 
         loadAvatar(post.authorAvatar)
 
@@ -177,6 +194,8 @@ class VideoPostViewHolder(
         setupPlayerView(post.attachment?.url)
 
         binding.buttonLike.isChecked = post.likedByMe
+        binding.likeCount.text = post.likeCount.toString()
+        enableLinks(binding.content)
         setupClicks(post)
     }
 
@@ -226,6 +245,7 @@ class AudioPostViewHolder(
     override fun bind(post: Post) {
         binding.authorName.text = post.author
         binding.content.text = post.content
+        binding.datePublication.text = DateUtils.formatTimestamp(post.published)
 
         loadAvatar(post.authorAvatar)
 
@@ -236,6 +256,8 @@ class AudioPostViewHolder(
         setupAudioPlayer(post)
 
         binding.buttonLike.isChecked = post.likedByMe
+        binding.likeCount.text = post.likeCount.toString()
+        enableLinks(binding.content)
         setupClicks(post)
     }
 

@@ -2,7 +2,7 @@ package ru.netology.nework.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class PostDto(
+data class EventDto(
     @SerializedName("id") val id: String,
     @SerializedName("authorId") val authorId: String,
     @SerializedName("author") val author: String,
@@ -10,6 +10,8 @@ data class PostDto(
     @SerializedName("authorAvatar") val authorAvatar: String?,
     @SerializedName("content") val content: String,
     @SerializedName("published") val published: Long,
+    @SerializedName("eventDate") val eventDate: Long,
+    @SerializedName("type") val type: String,
     @SerializedName("coords") val coords: CoordinatesDto?,
     @SerializedName("link") val link: String?,
     @SerializedName("mentionIds") val mentionIds: List<String>,
@@ -18,15 +20,7 @@ data class PostDto(
     @SerializedName("likedByMe") val likedByMe: Boolean,
     @SerializedName("likeCount") val likeCount: Int,
     @SerializedName("attachment") val attachment: AttachmentDto?,
+    @SerializedName("participants") val participants: List<UserDto>,
+    @SerializedName("speakers") val speakers: List<UserDto>,
     @SerializedName("users") val users: Map<String, UserDto>
-)
-
-data class AttachmentDto(
-    @SerializedName("url") val url: String,
-    @SerializedName("type") val type: String
-)
-
-data class CoordinatesDto(
-    @SerializedName("lat") val lat: Double,
-    @SerializedName("long") val long: Double
 )

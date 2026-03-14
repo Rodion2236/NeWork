@@ -172,6 +172,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/content" />
 
+        <TextView
+            android:id="@+id/likeCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="@id/buttonLike"
+            app:layout_constraintStart_toEndOf="@id/buttonLike"
+            app:layout_constraintTop_toTopOf="@id/buttonLike"
+            tools:text="9999" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonShare"
             style="@style/Widget.Material3.Button.IconButton"
@@ -179,9 +190,9 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
             app:icon="@drawable/ic_share_24"
-            app:layout_constraintBottom_toBottomOf="@id/buttonLike"
-            app:layout_constraintStart_toEndOf="@id/buttonLike"
-            app:layout_constraintTop_toTopOf="@id/buttonLike" />
+            app:layout_constraintBottom_toBottomOf="@id/likeCount"
+            app:layout_constraintStart_toEndOf="@id/likeCount"
+            app:layout_constraintTop_toTopOf="@id/likeCount" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonGroup"
@@ -193,7 +204,5 @@
             app:layout_constraintBottom_toBottomOf="@id/buttonShare"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/buttonShare" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </com.google.android.material.card.MaterialCardView>
