@@ -54,6 +54,11 @@
         android:name="ru.netology.nework.fragments.detailItem.DetailUserFragment"
         android:label="fragment_detail_user"
         tools:layout="@layout/fragment_detail_user" >
+
+        <argument
+            android:name="userId"
+            app:argType="string" />
+
         <action
             android:id="@+id/action_detailUserFragment_to_newJobFragment"
             app:destination="@id/newJobFragment" />

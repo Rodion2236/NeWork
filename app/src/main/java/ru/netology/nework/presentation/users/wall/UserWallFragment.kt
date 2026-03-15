@@ -1,4 +1,4 @@
-package ru.netology.nework.fragments.item
+package ru.netology.nework.presentation.users.wall
 
 import android.os.Bundle
 import android.view.View
@@ -7,43 +7,63 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.netology.nework.R
-import ru.netology.nework.databinding.FragmentUserBinding
-import ru.netology.nework.domain.model.User
-import ru.netology.nework.presentation.users.UsersUiState
-import ru.netology.nework.presentation.users.UsersViewModel
-import ru.netology.nework.presentation.users.adapter.UserAdapter
+import ru.netology.nework.databinding.FragmentPostsBinding
+import ru.netology.nework.presentation.feed.adapter.PostAdapter
+import ru.netology.nework.presentation.users.wall.UserWallViewModel
+import ru.netology.nework.util.VideoPlayerManager
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class UserFragment : Fragment(R.layout.fragment_user) {
+class UserWallFragment : Fragment(R.layout.fragment_posts) {
 
-    private val viewModel: UsersViewModel by viewModels()
+    companion object {
+        private const val ARG_USER_ID = "userId"
 
-    private var _binding: FragmentUserBinding? = null
+        fun newInstance(userId: String): UserWallFragment {
+            return UserWallFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_USER_ID, userId)
+                }
+            }
+        }
+    }
+
+    private val viewModel: UserWallViewModel by viewModels()
+
+    @Inject
+    lateinit var playerManager: VideoPlayerManager
+
+    private var _binding: FragmentPostsBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter: UserAdapter by lazy {
-        UserAdapter(
-            onUserClick = { user -> openUserDetail(user) }
+    private val adapter: PostAdapter by lazy {
+        PostAdapter(
+            onLikeClick = { id, liked -> viewModel.toggleLike(id, liked) },
+            onPostClick = { post -> // TODO: open detail
+                },
+            onMenuClick = { post, anchor -> // TODO: show menu
+                },
+            playerManager = playerManager
         )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentUserBinding.bind(view)
+        _binding = FragmentPostsBinding.bind(view)
 
         setupRecyclerView()
         setupObservers()
-        setupClicks()
     }
 
     private fun setupRecyclerView() {
-        binding.recyclerViewUser.adapter = adapter
+        binding.recyclerViewPost.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerViewPost.adapter = adapter
 
         lifecycleScope.launch {
             adapter.loadStateFlow.collect { loadState ->
@@ -66,43 +86,16 @@ class UserFragment : Fragment(R.layout.fragment_user) {
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.users.collect { pagingData ->
+                viewModel.posts.collect { pagingData ->
                     adapter.submitData(pagingData)
                 }
             }
         }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    when (state) {
-                        is UsersUiState.Error -> Snackbar.make(
-                            binding.root,
-                            getString(R.string.connection_error),
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                        else -> {}
-                    }
-                }
-            }
-        }
-    }
-
-    private fun setupClicks() {
-        binding.swipeRefresh.setOnRefreshListener {
-            adapter.refresh()
-        }
-    }
-
-    private fun openUserDetail(user: User) {
-        val bundle = Bundle().apply {
-            putString("userId", user.id)
-        }
-        findNavController().navigate(R.id.detailUserFragment, bundle)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        playerManager.release()
     }
 }
