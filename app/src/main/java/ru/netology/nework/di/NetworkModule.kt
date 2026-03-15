@@ -10,7 +10,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.netology.nework.data.remote.api.AuthApi
 import ru.netology.nework.data.remote.api.EventsApi
+import ru.netology.nework.data.remote.api.JobsApi
 import ru.netology.nework.data.remote.api.PostsApi
+import ru.netology.nework.data.remote.api.UsersApi
 import ru.netology.nework.data.remote.interceptor.ApiKeyInterceptor
 import javax.inject.Singleton
 
@@ -56,4 +58,12 @@ object NetworkModule {
     @Provides
     fun provideEventsApi(retrofit: Retrofit): EventsApi =
         retrofit.create(EventsApi::class.java)
+
+    @Provides
+    fun provideUsersApi(retrofit: Retrofit): UsersApi =
+        retrofit.create(UsersApi::class.java)
+
+    @Provides
+    fun provideJobsApi(retrofit: Retrofit): JobsApi =
+        retrofit.create(JobsApi::class.java)
 }

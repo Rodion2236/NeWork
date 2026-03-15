@@ -122,7 +122,7 @@ class TextPostViewHolder(
     override fun bind(post: Post) {
         binding.authorName.text = post.author
         binding.content.text = post.content
-        binding.datePublication.text = DateUtils.formatTimestamp(post.published)
+        binding.datePublication.text = DateUtils.formatIsoDate(post.published)
         binding.imageContent.visibility = View.GONE
         binding.videoContent.visibility = View.GONE
         binding.audioContent.visibility = View.GONE
@@ -143,7 +143,7 @@ class ImagePostViewHolder(
     override fun bind(post: Post) {
         binding.authorName.text = post.author
         binding.content.text = post.content
-        binding.datePublication.text = DateUtils.formatTimestamp(post.published)
+        binding.datePublication.text = DateUtils.formatIsoDate(post.published)
 
         loadAvatar(post.authorAvatar)
 
@@ -183,7 +183,7 @@ class VideoPostViewHolder(
     override fun bind(post: Post) {
         binding.authorName.text = post.author
         binding.content.text = post.content
-        binding.datePublication.text = DateUtils.formatTimestamp(post.published)
+        binding.datePublication.text = DateUtils.formatIsoDate(post.published)
 
         loadAvatar(post.authorAvatar)
 
@@ -224,7 +224,6 @@ class VideoPostViewHolder(
             binding.videoContent.visibility = View.GONE
             return
         }
-
         binding.videoContent.visibility = View.VISIBLE
         playerManager.setMediaUrl(url)
         binding.videoContent.useController = true
@@ -245,7 +244,7 @@ class AudioPostViewHolder(
     override fun bind(post: Post) {
         binding.authorName.text = post.author
         binding.content.text = post.content
-        binding.datePublication.text = DateUtils.formatTimestamp(post.published)
+        binding.datePublication.text = DateUtils.formatIsoDate(post.published)
 
         loadAvatar(post.authorAvatar)
 

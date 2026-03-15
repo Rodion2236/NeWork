@@ -5,8 +5,6 @@ import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.data.mapper.AuthResult
 import ru.netology.nework.data.mapper.User
 import ru.netology.nework.data.remote.api.AuthApi
-import ru.netology.nework.data.remote.dto.AuthenticationRequest
-import ru.netology.nework.data.remote.dto.RegistrationRequest
 import ru.netology.nework.domain.model.AuthResult
 import ru.netology.nework.domain.model.User
 import ru.netology.nework.domain.repository.AuthRepository
@@ -26,7 +24,10 @@ class AuthRepositoryImpl @Inject constructor(
         password: String
     ): Result<AuthResult> {
         return try {
-            val response = authApi.authenticate(AuthenticationRequest(login, password))
+            val response = authApi.authenticate(
+                login = login,
+                pass = password
+            )
 
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), "auth_error")
@@ -53,7 +54,11 @@ class AuthRepositoryImpl @Inject constructor(
         name: String
     ): Result<AuthResult> {
         return try {
-            val response = authApi.register(RegistrationRequest(login, password, name))
+            val response = authApi.register(
+                login = login,
+                pass = password,
+                name = name
+            )
 
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), "register_error")

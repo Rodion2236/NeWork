@@ -5,11 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import ru.netology.nework.domain.model.Post
 
 interface PostsRepository {
-
-    fun getFeed(): Flow<PagingData<Post>>
-
-    suspend fun getPost(postId: String): Result<Post>
-
+    fun getPosts(): Flow<PagingData<Post>>
     suspend fun createPost(post: Post): Result<Post>
 
     suspend fun likePost(postId: String, liked: Boolean): Result<Unit>

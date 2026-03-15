@@ -128,8 +128,8 @@ class TextEventViewHolder(
             EventType.ONLINE -> binding.root.context.getString(R.string.online)
             EventType.OFFLINE -> binding.root.context.getString(R.string.offline)
         }
-        binding.dateEvent.text = DateUtils.formatTimestamp(event.eventDate)
-        binding.datePublication.text = DateUtils.formatTimestamp(event.published)
+        binding.dateEvent.text = DateUtils.formatIsoDate(event.datetime)
+        binding.datePublication.text = DateUtils.formatIsoDate(event.published)
 
         binding.imageContent.visibility = View.GONE
         binding.videoContent.visibility = View.GONE
@@ -159,8 +159,8 @@ class ImageEventViewHolder(
             EventType.ONLINE -> binding.root.context.getString(R.string.online)
             EventType.OFFLINE -> binding.root.context.getString(R.string.offline)
         }
-        binding.dateEvent.text = DateUtils.formatTimestamp(event.eventDate)
-        binding.datePublication.text = DateUtils.formatTimestamp(event.published)
+        binding.dateEvent.text = DateUtils.formatIsoDate(event.datetime)
+        binding.datePublication.text = DateUtils.formatIsoDate(event.published)
 
         loadAvatar(event.authorAvatar)
 
@@ -169,12 +169,17 @@ class ImageEventViewHolder(
         binding.audioContent.visibility = View.GONE
         binding.buttonPlayEvent.visibility = if (event.type == EventType.ONLINE) View.VISIBLE else View.GONE
 
-        binding.imageContent.load(
-            url = event.attachment?.url,
-            placeholder = R.drawable.ic_image_24,
-            error = R.drawable.ic_broken_image_24,
-            centerCrop = true
-        )
+        val imageUrl = event.attachment?.url?.trim()
+        if (!imageUrl.isNullOrBlank()) {
+            binding.imageContent.load(
+                url = imageUrl,
+                placeholder = R.drawable.ic_image_24,
+                error = R.drawable.ic_broken_image_24,
+                centerCrop = true
+            )
+        } else {
+            binding.imageContent.visibility = View.GONE
+        }
 
         binding.buttonLike.isChecked = event.likedByMe
         binding.likeCount.text = event.likeCount.toString()
@@ -206,8 +211,8 @@ class VideoEventViewHolder(
             EventType.ONLINE -> binding.root.context.getString(R.string.online)
             EventType.OFFLINE -> binding.root.context.getString(R.string.offline)
         }
-        binding.dateEvent.text = DateUtils.formatTimestamp(event.eventDate)
-        binding.datePublication.text = DateUtils.formatTimestamp(event.published)
+        binding.dateEvent.text = DateUtils.formatIsoDate(event.datetime)
+        binding.datePublication.text = DateUtils.formatIsoDate(event.published)
 
         loadAvatar(event.authorAvatar)
 
@@ -215,8 +220,7 @@ class VideoEventViewHolder(
         binding.videoContent.visibility = View.VISIBLE
         binding.audioContent.visibility = View.GONE
         binding.buttonPlayEvent.visibility = if (event.type == EventType.ONLINE) View.VISIBLE else View.GONE
-
-        setupPlayerView(event.attachment?.url)
+        setupPlayerView(event.attachment?.url?.trim())
 
         binding.buttonLike.isChecked = event.likedByMe
         binding.likeCount.text = event.likeCount.toString()
@@ -274,8 +278,8 @@ class AudioEventViewHolder(
             EventType.ONLINE -> binding.root.context.getString(R.string.online)
             EventType.OFFLINE -> binding.root.context.getString(R.string.offline)
         }
-        binding.dateEvent.text = DateUtils.formatTimestamp(event.eventDate)
-        binding.datePublication.text = DateUtils.formatTimestamp(event.published)
+        binding.dateEvent.text = DateUtils.formatIsoDate(event.datetime)
+        binding.datePublication.text = DateUtils.formatIsoDate(event.published)
 
         loadAvatar(event.authorAvatar)
 
@@ -284,7 +288,7 @@ class AudioEventViewHolder(
         binding.audioContent.visibility = View.VISIBLE
         binding.buttonPlayEvent.visibility = if (event.type == EventType.ONLINE) View.VISIBLE else View.GONE
 
-        setupAudioPlayer(event)
+        setupAudioPlayer(event, event.attachment?.url?.trim())
 
         binding.buttonLike.isChecked = event.likedByMe
         binding.likeCount.text = event.likeCount.toString()
@@ -292,16 +296,16 @@ class AudioEventViewHolder(
         setupClicks(event)
     }
 
-    private fun setupAudioPlayer(event: Event) {
+    private fun setupAudioPlayer(event: Event, url: String?) {
         currentEventId = event.id
         isBound = true
 
         binding.playPauseAudio.setOnClickListener {
-            if (event.attachment?.url != null) {
+            if (!url.isNullOrBlank()) {
                 if (playerManager.isPlaying() && currentEventId == event.id) {
                     playerManager.pause()
                 } else {
-                    playerManager.setMediaUrl(event.attachment.url)
+                    playerManager.setMediaUrl(url)
                     playerManager.play()
                 }
                 updatePlayButtonIcon()

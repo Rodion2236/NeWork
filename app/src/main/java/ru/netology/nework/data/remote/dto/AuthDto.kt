@@ -4,12 +4,12 @@ import com.google.gson.annotations.SerializedName
 
 data class AuthenticationRequest(
     val login: String,
-    val password: String
+    val pass: String
 )
 
 data class RegistrationRequest(
     val login: String,
-    val password: String,
+    val pass: String,
     val name: String
 )
 

@@ -24,6 +24,7 @@
     <string name="incorrect_password">Неверный пароль</string>
     <string name="incorrect_login">Некорректный логин</string>
     <string name="user_unregistered">Пользователь не зарегистрирован</string>
+    <string name="user_not_found">Пользователь не найден</string>
     <string name="user">Пользователь</string>
     <string name="wall">Стена</string>
     <string name="jobs">Вакансии</string>

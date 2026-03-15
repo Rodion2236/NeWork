@@ -17,4 +17,8 @@ interface EventsRepository {
     suspend fun deleteEvent(eventId: String): Result<Unit>
 
     suspend fun likeEvent(eventId: String, liked: Boolean): Result<Unit>
+
+    suspend fun joinEvent(eventId: String): Result<Unit>
+
+    suspend fun leaveEvent(eventId: String): Result<Unit>
 }

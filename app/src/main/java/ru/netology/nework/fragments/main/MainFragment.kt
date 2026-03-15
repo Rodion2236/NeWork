@@ -7,7 +7,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nework.R
 import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.databinding.FragmentMainBinding
+import ru.netology.nework.fragments.item.EventsFragment
 import ru.netology.nework.fragments.item.PostsFragment
+import ru.netology.nework.fragments.item.UserFragment
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -30,13 +32,11 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                     true
                 }
                 R.id.eventsFragment -> {
-                    // TODO: Переключить на события
-                    // switchChildFragment(EventsFragment())
+                     switchChildFragment(EventsFragment())
                     true
                 }
                 R.id.usersFragment -> {
-                    // TODO: Переключить на пользователей
-                    // switchChildFragment(UsersFragment())
+                    switchChildFragment(UserFragment())
                     true
                 }
                 else -> false

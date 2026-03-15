@@ -7,7 +7,7 @@ data class Post(
     val authorJob: String?,
     val authorAvatar: String?,
     val content: String,
-    val published: Long,
+    val published: String,
     val coords: Coordinates?,
     val link: String?,
     val mentionIds: List<String>,
@@ -16,7 +16,7 @@ data class Post(
     val likedByMe: Boolean,
     val likeCount: Int,
     val attachment: Attachment?,
-    val users: Map<String, User>
+    val users: Map<String, UserPreview>
 )
 
 data class Attachment(

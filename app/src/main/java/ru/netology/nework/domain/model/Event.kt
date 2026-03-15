@@ -7,20 +7,19 @@ data class Event(
     val authorJob: String?,
     val authorAvatar: String?,
     val content: String,
-    val published: Long,
-    val eventDate: Long,
+    val published: String,
+    val datetime: String,
     val type: EventType,
     val coords: Coordinates?,
     val link: String?,
-    val mentionIds: List<String>,
-    val mentionedMe: Boolean,
     val likeOwnerIds: List<String>,
     val likedByMe: Boolean,
     val likeCount: Int,
+    val speakerIds: List<String>,
+    val participantsIds: List<String>,
+    val participatedByMe: Boolean,
     val attachment: Attachment?,
-    val participants: List<User>,
-    val speakers: List<User>,
-    val users: Map<String, User>
+    val users: Map<String, UserPreview>
 )
 
 enum class EventType { ONLINE, OFFLINE }

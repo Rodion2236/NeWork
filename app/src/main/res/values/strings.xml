@@ -24,6 +24,7 @@
     <string name="incorrect_password">Incorrect password</string>
     <string name="incorrect_login">Incorrect login</string>
     <string name="user_unregistered">User is unregistered</string>
+    <string name="user_not_found">User not found</string>
     <string name="user">user</string>
     <string name="wall">Wall</string>
     <string name="jobs">Jobs</string>

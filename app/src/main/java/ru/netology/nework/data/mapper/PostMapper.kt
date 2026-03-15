@@ -1,11 +1,13 @@
 package ru.netology.nework.data.mapper
 
 import ru.netology.nework.data.remote.dto.PostDto
+import ru.netology.nework.data.remote.dto.UserPreviewDto
 import ru.netology.nework.domain.model.Post
+import ru.netology.nework.domain.model.UserPreview
 
 fun Post(dto: PostDto): Post = Post(
-    id = dto.id,
-    authorId = dto.authorId,
+    id = dto.id.toString(),
+    authorId = dto.authorId.toString(),
     author = dto.author,
     authorJob = dto.authorJob,
     authorAvatar = dto.authorAvatar,
@@ -13,11 +15,29 @@ fun Post(dto: PostDto): Post = Post(
     published = dto.published,
     coords = dto.coords?.let { Coordinates(it) },
     link = dto.link,
-    mentionIds = dto.mentionIds,
+    mentionIds = dto.mentionIds.map { it.toString() },
     mentionedMe = dto.mentionedMe,
-    likeOwnerIds = dto.likeOwnerIds,
+    likeOwnerIds = dto.likeOwnerIds.map { it.toString() },
     likedByMe = dto.likedByMe,
-    likeCount = dto.likeCount,
+    likeCount = dto.likeOwnerIds.size,
     attachment = dto.attachment?.let { Attachment(it) },
-    users = dto.users.mapValues { it.value.let { userDto -> User(userDto) } }
+    users = dto.users.mapValues { it.value.let { previewDto -> UserPreview(previewDto) } }
+)
+
+fun PostDto(post: Post): PostDto = PostDto(
+    id = post.id.toInt(),
+    authorId = post.authorId.toInt(),
+    author = post.author,
+    authorJob = post.authorJob,
+    authorAvatar = post.authorAvatar,
+    content = post.content,
+    published = post.published,
+    coords = post.coords?.let { CoordinatesDto(it) },
+    link = post.link,
+    mentionIds = post.mentionIds.map { it.toInt() },
+    mentionedMe = post.mentionedMe,
+    likeOwnerIds = post.likeOwnerIds.map { it.toInt() },
+    likedByMe = post.likedByMe,
+    attachment = post.attachment?.let { AttachmentDto(it) },
+    users = post.users.mapValues { it.value.let { preview -> UserPreviewDto(preview) } }
 )

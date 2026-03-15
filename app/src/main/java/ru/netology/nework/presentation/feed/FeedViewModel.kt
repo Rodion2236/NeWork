@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(private val postsRepository: PostsRepository) : ViewModel() {
-    val posts: Flow<PagingData<Post>> = postsRepository.getFeed()
+    val posts: Flow<PagingData<Post>> = postsRepository.getPosts()
         .cachedIn(viewModelScope)
 
     private val _uiState = MutableStateFlow<FeedUiState>(FeedUiState.Idle)

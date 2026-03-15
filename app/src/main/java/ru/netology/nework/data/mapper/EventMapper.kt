@@ -5,53 +5,50 @@ import ru.netology.nework.domain.model.Event
 import ru.netology.nework.domain.model.EventType
 
 fun Event(dto: EventDto): Event = Event(
-    id = dto.id,
-    authorId = dto.authorId,
+    id = dto.id.toString(),
+    authorId = dto.authorId.toString(),
     author = dto.author,
     authorJob = dto.authorJob,
     authorAvatar = dto.authorAvatar,
     content = dto.content,
     published = dto.published,
-    eventDate = dto.eventDate,
+    datetime = dto.datetime,
     type = when (dto.type.lowercase()) {
         "offline" -> EventType.OFFLINE
         else -> EventType.ONLINE
     },
     coords = dto.coords?.let { Coordinates(it) },
     link = dto.link,
-    mentionIds = dto.mentionIds,
-    mentionedMe = dto.mentionedMe,
-    likeOwnerIds = dto.likeOwnerIds,
+    likeOwnerIds = dto.likeOwnerIds.map { it.toString() },
     likedByMe = dto.likedByMe,
-    likeCount = dto.likeCount,
+    likeCount = dto.likeOwnerIds.size,
+    speakerIds = dto.speakerIds.map { it.toString() },
+    participantsIds = dto.participantsIds.map { it.toString() },
+    participatedByMe = dto.participatedByMe,
     attachment = dto.attachment?.let { Attachment(it) },
-    participants = dto.participants.map { User(it) },
-    speakers = dto.speakers.map { User(it) },
-    users = dto.users.mapValues { it.value.let { userDto -> User(userDto) } }
+    users = dto.users.mapValues { it.value.let { previewDto -> UserPreview(previewDto) } }
 )
 
 fun EventDto(event: Event): EventDto = EventDto(
-    id = event.id,
-    authorId = event.authorId,
+    id = event.id.toInt(),
+    authorId = event.authorId.toInt(),
     author = event.author,
     authorJob = event.authorJob,
     authorAvatar = event.authorAvatar,
     content = event.content,
     published = event.published,
-    eventDate = event.eventDate,
+    datetime = event.datetime,
     type = when (event.type) {
         EventType.ONLINE -> "online"
         EventType.OFFLINE -> "offline"
     },
     coords = event.coords?.let { CoordinatesDto(it) },
     link = event.link,
-    mentionIds = event.mentionIds,
-    mentionedMe = event.mentionedMe,
-    likeOwnerIds = event.likeOwnerIds,
+    likeOwnerIds = event.likeOwnerIds.map { it.toInt() },
     likedByMe = event.likedByMe,
-    likeCount = event.likeCount,
+    speakerIds = event.speakerIds.map { it.toInt() },
+    participantsIds = event.participantsIds.map { it.toInt() },
+    participatedByMe = event.participatedByMe,
     attachment = event.attachment?.let { AttachmentDto(it) },
-    participants = event.participants.map { UserDto(it) },
-    speakers = event.speakers.map { UserDto(it) },
-    users = event.users.mapValues { it.value.let { user -> UserDto(user) } }
+    users = event.users.mapValues { it.value.let { preview -> UserPreviewDto(preview) } }
 )

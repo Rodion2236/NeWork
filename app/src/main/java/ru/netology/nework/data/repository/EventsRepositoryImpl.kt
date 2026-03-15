@@ -20,12 +20,15 @@ class EventsRepositoryImpl @Inject constructor(
     override fun getEvents(): Flow<PagingData<Event>> = flow {
         try {
             val response = eventsApi.getEvents()
-            if (response.isSuccessful && response.body() != null) {
-                val events = response.body()!!.map { Event(it) }
-                emit(PagingData.from(events))
-            } else {
+
+            if (!response.isSuccessful) {
                 throw ApiError(response.code(), "events_error")
             }
+
+            val eventsDto = response.body() ?: throw ApiError(response.code(), "empty_response")
+            val events = eventsDto.map { Event(it) }
+            emit(PagingData.from(events))
+
         } catch (e: Exception) {
             Log.e("EventsRepository", "getEvents failed", e)
             emit(PagingData.from(emptyList<Event>()))
@@ -34,15 +37,12 @@ class EventsRepositoryImpl @Inject constructor(
 
     override suspend fun getEvent(eventId: String): Result<Event> {
         return try {
-            val response = eventsApi.getEvent(eventId)
+            val response = eventsApi.getEvent(eventId.toInt())
 
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), "event_not_found")
             }
-
-            val eventDto = response.body()
-                ?: throw ApiError(response.code(), "empty_response")
-
+            val eventDto = response.body() ?: throw ApiError(response.code(), "empty_response")
             Result.success(Event(eventDto))
 
         } catch (e: Exception) {
@@ -53,17 +53,12 @@ class EventsRepositoryImpl @Inject constructor(
 
     override suspend fun createEvent(event: Event): Result<Event> {
         return try {
-            val eventDto = EventDto(event)
-
-            val response = eventsApi.createEvent(eventDto)
+            val response = eventsApi.createEvent(EventDto(event))
 
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), "create_event_error")
             }
-
-            val createdDto = response.body()
-                ?: throw ApiError(response.code(), "empty_response")
-
+            val createdDto = response.body() ?: throw ApiError(response.code(), "empty_response")
             Result.success(Event(createdDto))
 
         } catch (e: Exception) {
@@ -73,29 +68,12 @@ class EventsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateEvent(eventId: String, event: Event): Result<Event> {
-        return try {
-            val eventDto = EventDto(event)
-
-            val response = eventsApi.updateEvent(eventId, eventDto)
-
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), "update_event_error")
-            }
-
-            val updatedDto = response.body()
-                ?: throw ApiError(response.code(), "empty_response")
-
-            Result.success(Event(updatedDto))
-
-        } catch (e: Exception) {
-            Log.e("EventsRepository", "updateEvent failed", e)
-            Result.failure(AppError.from(e))
-        }
+        return Result.failure(UnsupportedOperationException("updateEvent not implemented"))
     }
 
     override suspend fun deleteEvent(eventId: String): Result<Unit> {
         return try {
-            val response = eventsApi.deleteEvent(eventId)
+            val response = eventsApi.deleteEvent(eventId.toInt())
 
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), "delete_event_error")
@@ -112,9 +90,9 @@ class EventsRepositoryImpl @Inject constructor(
     override suspend fun likeEvent(eventId: String, liked: Boolean): Result<Unit> {
         return try {
             val response = if (liked) {
-                eventsApi.likeEvent(eventId)
+                eventsApi.likeEvent(eventId.toInt())
             } else {
-                eventsApi.unlikeEvent(eventId)
+                eventsApi.unlikeEvent(eventId.toInt())
             }
 
             if (!response.isSuccessful) {
@@ -125,6 +103,32 @@ class EventsRepositoryImpl @Inject constructor(
 
         } catch (e: Exception) {
             Log.e("EventsRepository", "likeEvent failed", e)
+            Result.failure(AppError.from(e))
+        }
+    }
+
+    override suspend fun joinEvent(eventId: String): Result<Unit> {
+        return try {
+            val response = eventsApi.joinEvent(eventId.toInt())
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), "join_error")
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("EventsRepository", "joinEvent failed", e)
+            Result.failure(AppError.from(e))
+        }
+    }
+
+    override suspend fun leaveEvent(eventId: String): Result<Unit> {
+        return try {
+            val response = eventsApi.leaveEvent(eventId.toInt())
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), "leave_error")
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("EventsRepository", "leaveEvent failed", e)
             Result.failure(AppError.from(e))
         }
     }
