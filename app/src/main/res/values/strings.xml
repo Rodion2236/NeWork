@@ -84,4 +84,5 @@
     <string name="event_action_success">Event action success</string>
     <string name="confirm_delete_event">Confirm delete event?</string>
     <string name="like_count">%d</string>
+    <string name="post_not_found">Post not found</string>
 </resources>

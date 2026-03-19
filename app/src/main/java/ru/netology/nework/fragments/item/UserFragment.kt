@@ -98,7 +98,7 @@ class UserFragment : Fragment(R.layout.fragment_user) {
         val bundle = Bundle().apply {
             putString("userId", user.id)
         }
-        findNavController().navigate(R.id.detailUserFragment, bundle)
+        findNavController().navigate(R.id.action_global_to_detailUserFragment, bundle)
     }
 
     override fun onDestroyView() {

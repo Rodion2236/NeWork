@@ -11,4 +11,6 @@ interface PostsRepository {
     suspend fun likePost(postId: String, liked: Boolean): Result<Unit>
 
     suspend fun deletePost(postId: String): Result<Unit>
+
+    suspend fun getPost(postId: String): Result<Post>
 }

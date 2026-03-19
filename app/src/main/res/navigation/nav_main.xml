@@ -15,23 +15,6 @@
             app:destination="@id/loginFragment"
             app:enterAnim="@android:anim/fade_in"
             app:exitAnim="@android:anim/fade_out" />
-        <action
-            android:id="@+id/action_mainFragment_to_detailUserFragment"
-            app:destination="@id/detailUserFragment" />
-        <action
-            android:id="@+id/action_mainFragment_to_newPostFragment"
-            app:destination="@id/newPostFragment"
-            app:enterAnim="@android:anim/fade_in"
-            app:exitAnim="@android:anim/fade_out" />
-        <action
-            android:id="@+id/action_mainFragment_to_newEventFragment"
-            app:destination="@id/newEventFragment" />
-        <action
-            android:id="@+id/action_mainFragment_to_detailPostFragment"
-            app:destination="@id/detailPostFragment" />
-        <action
-            android:id="@+id/action_mainFragment_to_detailEventFragment"
-            app:destination="@id/detailEventFragment" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -50,69 +33,68 @@
         android:label="fragment_register"
         tools:layout="@layout/fragment_register" />
     <fragment
+        android:id="@+id/detailPostFragment"
+        android:name="ru.netology.nework.fragments.detailItem.DetailPostFragment"
+        android:label="fragment_detail_post"
+        tools:layout="@layout/fragment_detail_post" >
+        <argument
+            android:name="postId"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/detailEventFragment"
+        android:name="ru.netology.nework.fragments.detailItem.DetailEventFragment"
+        android:label="fragment_detail_event"
+        tools:layout="@layout/fragment_detail_event" >
+        <argument
+            android:name="eventId"
+            app:argType="string" />
+    </fragment>
+    <fragment
         android:id="@+id/detailUserFragment"
         android:name="ru.netology.nework.fragments.detailItem.DetailUserFragment"
         android:label="fragment_detail_user"
         tools:layout="@layout/fragment_detail_user" >
-
         <argument
             android:name="userId"
             app:argType="string" />
-
-        <action
-            android:id="@+id/action_detailUserFragment_to_newJobFragment"
-            app:destination="@id/newJobFragment" />
-        <action
-            android:id="@+id/action_detailUserFragment_to_detailPostFragment"
-            app:destination="@id/detailPostFragment" />
     </fragment>
     <fragment
         android:id="@+id/newPostFragment"
         android:name="ru.netology.nework.fragments.newItem.NewPostFragment"
         android:label="fragment_new_post"
-        tools:layout="@layout/fragment_new_post" >
-        <action
-            android:id="@+id/action_newPostFragment_to_mapsFragment"
-            app:destination="@id/mapsFragment" />
-        <action
-            android:id="@+id/action_newPostFragment_to_usersFragment2"
-            app:destination="@id/usersFragment2" />
-    </fragment>
-    <fragment
-        android:id="@+id/mapsFragment"
-        android:name="ru.netology.nework.fragments.item.MapsFragment"
-        android:label="fragment_maps"
-        tools:layout="@layout/fragment_maps" />
-    <fragment
-        android:id="@+id/usersFragment2"
-        android:name="ru.netology.nework.fragments.item.UserFragment"
-        android:label="fragment_users"
-        tools:layout="@layout/fragment_user" />
+        tools:layout="@layout/fragment_new_post" />
     <fragment
         android:id="@+id/newEventFragment"
         android:name="ru.netology.nework.fragments.newItem.NewEventFragment"
         android:label="fragment_new_event"
-        tools:layout="@layout/fragment_new_event" >
-        <action
-            android:id="@+id/action_newEventFragment_to_mapsFragment"
-            app:destination="@id/mapsFragment" />
-        <action
-            android:id="@+id/action_newEventFragment_to_usersFragment2"
-            app:destination="@id/usersFragment2" />
-    </fragment>
+        tools:layout="@layout/fragment_new_event" />
     <fragment
         android:id="@+id/newJobFragment"
         android:name="ru.netology.nework.fragments.newItem.NewJobFragment"
         android:label="fragment_new_job"
         tools:layout="@layout/fragment_new_job" />
     <fragment
-        android:id="@+id/detailPostFragment"
-        android:name="ru.netology.nework.fragments.detailItem.DetailPostFragment"
-        android:label="fragment_detail_post"
-        tools:layout="@layout/fragment_detail_post" />
-    <fragment
-        android:id="@+id/detailEventFragment"
-        android:name="ru.netology.nework.fragments.detailItem.DetailEventFragment"
-        android:label="fragment_detail_event"
-        tools:layout="@layout/fragment_detail_event" />
+        android:id="@+id/mapsFragment"
+        android:name="ru.netology.nework.fragments.item.MapsFragment"
+        android:label="fragment_maps"
+        tools:layout="@layout/fragment_maps" />
+
+    <action
+        android:id="@+id/action_global_to_detailPostFragment"
+        app:destination="@id/detailPostFragment"
+        app:popUpTo="@id/mainFragment"
+        app:popUpToInclusive="false" />
+
+    <action
+        android:id="@+id/action_global_to_detailEventFragment"
+        app:destination="@id/detailEventFragment"
+        app:popUpTo="@id/mainFragment"
+        app:popUpToInclusive="false" />
+
+    <action
+        android:id="@+id/action_global_to_detailUserFragment"
+        app:destination="@id/detailUserFragment"
+        app:popUpTo="@id/mainFragment"
+        app:popUpToInclusive="false" />
 </navigation>

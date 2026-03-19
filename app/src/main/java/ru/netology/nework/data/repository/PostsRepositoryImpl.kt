@@ -3,6 +3,7 @@ package ru.netology.nework.data.repository
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import ru.netology.nework.data.mapper.Post
 import ru.netology.nework.data.remote.api.PostsApi
 import ru.netology.nework.domain.model.Post
 import ru.netology.nework.domain.repository.PostsRepository
@@ -74,6 +75,19 @@ class PostsRepositoryImpl @Inject constructor(
                 throw ApiError(response.code(), "delete_error")
             }
             Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(AppError.from(e))
+        }
+    }
+
+    override suspend fun getPost(postId: String): Result<Post> {
+        return try {
+            val response = postsApi.getPost(postId)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), "post_not_found")
+            }
+            val postDto = response.body() ?: throw ApiError(response.code(), "empty_response")
+            Result.success(Post(postDto))
         } catch (e: Exception) {
             Result.failure(AppError.from(e))
         }

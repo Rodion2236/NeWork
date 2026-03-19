@@ -40,6 +40,8 @@ android {
                 "YANDEX_MAPKIT_KEY",
                 "\"${apiKeyProperties.getProperty("YANDEX_MAPKIT_KEY", "")}\""
             )
+            manifestPlaceholders["YANDEX_MAPKIT_KEY"] =
+                apiKeyProperties.getProperty("YANDEX_MAPKIT_KEY", "")
         }
         release {
             isMinifyEnabled = false
@@ -47,6 +49,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            manifestPlaceholders["YANDEX_MAPKIT_KEY"] =
+                apiKeyProperties.getProperty("YANDEX_MAPKIT_KEY", "")
         }
     }
 

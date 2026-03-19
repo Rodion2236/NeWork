@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_test"
+    android:id="@+id/nav_bottom_navigation_view"
     app:startDestination="@id/postsFragment">
 
     <fragment
@@ -12,7 +12,7 @@
         tools:layout="@layout/fragment_posts" />
     <fragment
         android:id="@+id/eventsFragment"
-        android:name="ru.netology.nework.fragments.item.EventFragment"
+        android:name="ru.netology.nework.fragments.item.EventsFragment"
         android:label="fragment_events"
         tools:layout="@layout/fragment_event" />
     <fragment

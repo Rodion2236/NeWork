@@ -1,60 +1,222 @@
 package ru.netology.nework.fragments.detailItem
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
+import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.geometry.Point
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.netology.nework.R
+import ru.netology.nework.databinding.FragmentDetailPostBinding
+import ru.netology.nework.domain.model.AttachmentType
+import ru.netology.nework.domain.model.Post
+import ru.netology.nework.domain.model.User as DomainUser
+import ru.netology.nework.presentation.detailpost.DetailPostUiState
+import ru.netology.nework.presentation.detailpost.DetailPostViewModel
+import ru.netology.nework.presentation.detailpost.adapter.AvatarAdapter
+import ru.netology.nework.util.DateUtils
+import ru.netology.nework.util.VideoPlayerManager
+import ru.netology.nework.util.load
+import javax.inject.Inject
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+@AndroidEntryPoint
+class DetailPostFragment : Fragment(R.layout.fragment_detail_post) {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [DetailPostFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class DetailPostFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private val viewModel: DetailPostViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    @Inject
+    lateinit var playerManager: VideoPlayerManager
+
+    private var _binding: FragmentDetailPostBinding? = null
+    private val binding get() = _binding!!
+
+    private val likersAdapter: AvatarAdapter by lazy { AvatarAdapter() }
+    private val mentionedAdapter: AvatarAdapter by lazy { AvatarAdapter() }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentDetailPostBinding.bind(view)
+
+        setupRecyclerViews()
+        setupObservers()
+        setupToolbar()
+        setupClicks()
+    }
+
+    private fun setupRecyclerViews() {
+        binding.recyclerLikers.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerLikers.adapter = likersAdapter
+
+        binding.recyclerMentioned.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerMentioned.adapter = mentionedAdapter
+    }
+
+    private fun setupObservers() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is DetailPostUiState.Loading -> {}
+                        is DetailPostUiState.Success -> {
+                            bindPost(state.post)
+                        }
+                        is DetailPostUiState.Error -> {
+                            Snackbar.make(
+                                binding.root,
+                                getString(R.string.connection_error),
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            }
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_detail_post, container, false)
+    private fun bindPost(post: Post) {
+        binding.authorName.text = post.author
+        binding.lastWork.text = post.authorJob ?: getString(R.string.in_search_work)
+
+        binding.avatar.load(
+            url = post.authorAvatar?.trim(),
+            placeholder = R.drawable.ic_account_circle_24,
+            error = R.drawable.ic_account_circle_24,
+            roundedCorners = 24
+        )
+
+        binding.datePublished.text = DateUtils.formatIsoDate(post.published)
+        binding.content.text = post.content
+
+        binding.buttonLike.isChecked = post.likedByMe
+
+        val likers = post.users.values.map { preview ->
+            DomainUser(
+                id = "",
+                login = "",
+                name = preview.name,
+                avatar = preview.avatar
+            )
+        }.take(10)
+        likersAdapter.submitList(likers)
+
+        val mentionedUsers = post.users
+            .filterKeys { it in post.mentionIds }
+            .values
+            .map { preview ->
+                DomainUser(
+                    id = "",
+                    login = "",
+                    name = preview.name,
+                    avatar = preview.avatar
+                )
+            }
+        mentionedAdapter.submitList(mentionedUsers)
+
+        setupAttachment(post)
+        setupMap(post)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment DetailPostFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            DetailPostFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    private fun setupAttachment(post: Post) {
+        when (post.attachment?.type) {
+            AttachmentType.IMAGE -> {
+                binding.imageContent.visibility = View.VISIBLE
+                binding.videoContent.visibility = View.GONE
+                binding.audioContent.visibility = View.GONE
+
+                val imageUrl = post.attachment.url?.trim()
+                if (!imageUrl.isNullOrBlank()) {
+                    binding.imageContent.load(
+                        url = imageUrl,
+                        placeholder = R.drawable.ic_image_24,
+                        error = R.drawable.ic_broken_image_24,
+                        centerCrop = true
+                    )
                 }
             }
+            AttachmentType.VIDEO -> {
+                binding.imageContent.visibility = View.GONE
+                binding.videoContent.visibility = View.VISIBLE
+                binding.audioContent.visibility = View.GONE
+
+                val videoUrl = post.attachment.url?.trim()
+                if (!videoUrl.isNullOrBlank()) {
+                    binding.videoContent.player = playerManager.getPlayer()
+                    playerManager.setMediaUrl(videoUrl)
+                }
+            }
+            AttachmentType.AUDIO -> {
+                binding.imageContent.visibility = View.GONE
+                binding.videoContent.visibility = View.GONE
+                binding.audioContent.visibility = View.VISIBLE
+
+                val audioUrl = post.attachment.url?.trim()
+                if (!audioUrl.isNullOrBlank()) {
+                    binding.playPauseAudio.setOnClickListener {
+                        if (playerManager.isPlaying()) {
+                            playerManager.pause()
+                        } else {
+                            playerManager.setMediaUrl(audioUrl)
+                            playerManager.play()
+                        }
+                    }
+                }
+            }
+            else -> {
+                binding.imageContent.visibility = View.GONE
+                binding.videoContent.visibility = View.GONE
+                binding.audioContent.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun setupMap(post: Post) {
+        if (post.coords != null && post.coords.lat != 0.0 && post.coords.long != 0.0) {
+            binding.map.visibility = View.VISIBLE
+
+            try {
+                MapKitFactory.initialize(requireContext())
+            } catch (_: IllegalStateException) {
+            }
+
+            binding.map.mapWindow.map.move(
+                CameraPosition(
+                    Point(post.coords.lat, post.coords.long),
+                    15f,
+                    0f,
+                    0f
+                )
+            )
+        } else {
+            binding.map.visibility = View.GONE
+        }
+    }
+
+    private fun setupToolbar() {
+        binding.topAppBar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+    }
+
+    private fun setupClicks() {
+        binding.buttonLike.setOnClickListener {
+            viewModel.toggleLike()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+        playerManager.release()
     }
 }

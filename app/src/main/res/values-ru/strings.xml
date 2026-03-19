@@ -37,6 +37,7 @@
     <string name="empty_password">Пустой пароль</string>
     <string name="name_is_empty">Имя пустое</string>
     <string name="post">Пост</string>
+    <string name="post_not_found">Пост не найден</string>
     <string name="likers">Понравилось</string>
     <string name="mentioned">Упомянуты</string>
     <string name="event">Мероприятие</string>

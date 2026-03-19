@@ -123,7 +123,7 @@ class EventsFragment : Fragment(R.layout.fragment_event) {
         }
 
         binding.buttonNewEvent.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_newEventFragment)
+            findNavController().navigate(R.id.newEventFragment)
         }
     }
 
@@ -159,7 +159,10 @@ class EventsFragment : Fragment(R.layout.fragment_event) {
     }
 
     private fun openEventDetail(event: Event) {
-        // TODO: Навигация на детали события
+        val bundle = Bundle().apply {
+            putString("eventId", event.id)
+        }
+        findNavController().navigate(R.id.action_global_to_detailEventFragment, bundle)
     }
 
     override fun onDestroyView() {

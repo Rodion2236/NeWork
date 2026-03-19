@@ -123,7 +123,7 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
         }
 
         binding.buttonNewPost.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_newPostFragment)
+            findNavController().navigate(R.id.newPostFragment)
         }
     }
 
@@ -159,7 +159,10 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
     }
 
     private fun openPostDetail(post: Post) {
-        // TODO: Навигация на детали поста
+        val bundle = Bundle().apply {
+            putString("postId", post.id)
+        }
+        findNavController().navigate(R.id.action_global_to_detailPostFragment, bundle)
     }
 
     override fun onDestroyView() {
