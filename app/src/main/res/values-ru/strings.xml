@@ -84,4 +84,6 @@
     <string name="event_action_success">Действие выполнено</string>
     <string name="confirm_delete_event">Вы уверены, что хотите удалить это событие?</string>
     <string name="like_count">%d</string>
+    <string name="participants_count">Участники (%d)</string>
+    <string name="event_not_found">Событие не найдено</string>
 </resources>

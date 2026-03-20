@@ -85,4 +85,6 @@
     <string name="confirm_delete_event">Confirm delete event?</string>
     <string name="like_count">%d</string>
     <string name="post_not_found">Post not found</string>
+    <string name="participants_count">Participants (%d)</string>
+    <string name="event_not_found">Event not found</string>
 </resources>
