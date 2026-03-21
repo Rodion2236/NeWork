@@ -44,7 +44,8 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
             onLikeClick = { id, liked -> viewModel.toggleLike(id, liked) },
             onPostClick = { post -> openPostDetail(post) },
             onMenuClick = { post, anchor -> showPostMenu(post, anchor) },
-            playerManager = playerManager
+            playerManager = playerManager,
+            currentUserId = tokenStorage.getUserId()
         )
     }
 

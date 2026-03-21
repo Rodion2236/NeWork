@@ -21,7 +21,8 @@ class PostAdapter(
     private val onLikeClick: (String, Boolean) -> Unit,
     private val onPostClick: (Post) -> Unit,
     private val onMenuClick: (Post, anchor: View) -> Unit,
-    private val playerManager: VideoPlayerManager
+    private val playerManager: VideoPlayerManager,
+    private val currentUserId: String?
 ) : PagingDataAdapter<Post, PostViewHolder>(PostDiffCallback()) {
 
     override fun getItemViewType(position: Int): Int =
@@ -37,10 +38,10 @@ class PostAdapter(
             LayoutInflater.from(parent.context), parent, false
         )
         return when (viewType) {
-            VIEW_TYPE_IMAGE -> ImagePostViewHolder(binding, onLikeClick, onPostClick, onMenuClick)
-            VIEW_TYPE_VIDEO -> VideoPostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, playerManager)
-            VIEW_TYPE_AUDIO -> AudioPostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, playerManager)
-            else -> TextPostViewHolder(binding, onLikeClick, onPostClick, onMenuClick)
+            VIEW_TYPE_IMAGE -> ImagePostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, currentUserId)
+            VIEW_TYPE_VIDEO -> VideoPostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, playerManager, currentUserId)
+            VIEW_TYPE_AUDIO -> AudioPostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, playerManager, currentUserId)
+            else -> TextPostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, currentUserId)
         }
     }
 
@@ -75,7 +76,8 @@ abstract class PostViewHolder(
     protected val binding: CardPostBinding,
     private val onLikeClick: (String, Boolean) -> Unit,
     private val onPostClick: (Post) -> Unit,
-    private val onMenuClick: (Post, anchor: View) -> Unit
+    private val onMenuClick: (Post, anchor: View) -> Unit,
+    protected val currentUserId: String?
 ) : RecyclerView.ViewHolder(binding.root) {
 
     abstract fun bind(post: Post)
@@ -116,8 +118,9 @@ class TextPostViewHolder(
     binding: CardPostBinding,
     onLikeClick: (String, Boolean) -> Unit,
     onPostClick: (Post) -> Unit,
-    onMenuClick: (Post, View) -> Unit
-) : PostViewHolder(binding, onLikeClick, onPostClick, onMenuClick) {
+    onMenuClick: (Post, View) -> Unit,
+    currentUserId: String?
+) : PostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, currentUserId) {
 
     override fun bind(post: Post) {
         binding.authorName.text = post.author
@@ -128,6 +131,12 @@ class TextPostViewHolder(
         binding.audioContent.visibility = View.GONE
         binding.buttonLike.isChecked = post.likedByMe
         binding.likeCount.text = post.likeCount.toString()
+        binding.buttonOption.visibility = if (post.authorId == currentUserId) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+
         enableLinks(binding.content)
         setupClicks(post)
     }
@@ -137,8 +146,9 @@ class ImagePostViewHolder(
     binding: CardPostBinding,
     onLikeClick: (String, Boolean) -> Unit,
     onPostClick: (Post) -> Unit,
-    onMenuClick: (Post, anchor: View) -> Unit
-) : PostViewHolder(binding, onLikeClick, onPostClick, onMenuClick) {
+    onMenuClick: (Post, anchor: View) -> Unit,
+    currentUserId: String?
+) : PostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, currentUserId) {
 
     override fun bind(post: Post) {
         binding.authorName.text = post.author
@@ -160,6 +170,12 @@ class ImagePostViewHolder(
 
         binding.buttonLike.isChecked = post.likedByMe
         binding.likeCount.text = post.likeCount.toString()
+        binding.buttonOption.visibility = if (post.authorId == currentUserId) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+
         enableLinks(binding.content)
         setupClicks(post)
     }
@@ -175,8 +191,9 @@ class VideoPostViewHolder(
     onLikeClick: (String, Boolean) -> Unit,
     onPostClick: (Post) -> Unit,
     onMenuClick: (Post, anchor: View) -> Unit,
-    private val playerManager: VideoPlayerManager
-) : PostViewHolder(binding, onLikeClick, onPostClick, onMenuClick) {
+    private val playerManager: VideoPlayerManager,
+    currentUserId: String?
+) : PostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, currentUserId) {
 
     private var isPlayerAttached = false
 
@@ -195,6 +212,12 @@ class VideoPostViewHolder(
 
         binding.buttonLike.isChecked = post.likedByMe
         binding.likeCount.text = post.likeCount.toString()
+        binding.buttonOption.visibility = if (post.authorId == currentUserId) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+
         enableLinks(binding.content)
         setupClicks(post)
     }
@@ -235,8 +258,9 @@ class AudioPostViewHolder(
     onLikeClick: (String, Boolean) -> Unit,
     onPostClick: (Post) -> Unit,
     onMenuClick: (Post, anchor: View) -> Unit,
-    private val playerManager: VideoPlayerManager
-) : PostViewHolder(binding, onLikeClick, onPostClick, onMenuClick) {
+    private val playerManager: VideoPlayerManager,
+    currentUserId: String?
+) : PostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, currentUserId) {
 
     private var currentPostId: String? = null
     private var isBound = false
@@ -256,6 +280,12 @@ class AudioPostViewHolder(
 
         binding.buttonLike.isChecked = post.likedByMe
         binding.likeCount.text = post.likeCount.toString()
+        binding.buttonOption.visibility = if (post.authorId == currentUserId) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+
         enableLinks(binding.content)
         setupClicks(post)
     }
