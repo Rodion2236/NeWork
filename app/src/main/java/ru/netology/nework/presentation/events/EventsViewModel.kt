@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.netology.nework.domain.model.Event
+import ru.netology.nework.domain.model.EventType
 import ru.netology.nework.domain.repository.EventsRepository
 import javax.inject.Inject
 
@@ -46,9 +47,21 @@ class EventsViewModel @Inject constructor(
         }
     }
 
-    fun createEvent(event: Event) {
+    fun createEvent(
+        content: String,
+        type: EventType,
+        datetime: Long?,
+        coords: Pair<Double, Double>?,
+        speakerIds: List<String>
+    ) {
         viewModelScope.launch {
-            eventsRepository.createEvent(event)
+            eventsRepository.createEvent(
+                content = content,
+                type = type,
+                datetime = datetime,
+                coords = coords,
+                speakerIds = speakerIds
+            )
                 .onSuccess {
                     _uiState.value = EventsUiState.Success("event_created")
                 }

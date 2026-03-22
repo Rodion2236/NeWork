@@ -1,60 +1,135 @@
 package ru.netology.nework.fragments.newItem
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.netology.nework.R
+import ru.netology.nework.databinding.FragmentNewEventBinding
+import ru.netology.nework.presentation.newevent.NewEventUiState
+import ru.netology.nework.presentation.newevent.NewEventViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+@AndroidEntryPoint
+class NewEventFragment : Fragment(R.layout.fragment_new_event) {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [NewEventFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class NewEventFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private val viewModel: NewEventViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private var _binding: FragmentNewEventBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentNewEventBinding.bind(view)
+
+        setupClicks()
+        setupObservers()
+        setupToolbar()
+    }
+
+    private fun setupClicks() {
+        binding.buttonSetDate.setOnClickListener {
+            val datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText(getString(R.string.select_date))
+                .build()
+            datePicker.addOnPositiveButtonClickListener { timestamp: Long ->
+                viewModel.onDateSelected(timestamp)
+            }
+            datePicker.show(parentFragmentManager, "DATE_PICKER")
+        }
+
+        binding.addPhoto.setOnClickListener {
+            Toast.makeText(requireContext(), "Добавление фото", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.addFile.setOnClickListener {
+            Toast.makeText(requireContext(), "Добавление файла", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.addUser.setOnClickListener {
+            Toast.makeText(requireContext(), "Выбор пользователей", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.addLocation.setOnClickListener {
+            findNavController().navigate(R.id.mapsFragment)
+        }
+
+        binding.removeLocation.setOnClickListener {
+            viewModel.onLocationRemoved()
+        }
+
+        binding.removeImageAttachment.setOnClickListener {
+            // TODO: Логика удаления фото
+        }
+
+        binding.topAppBar.menu.findItem(R.id.save)?.setOnMenuItemClickListener {
+            val content = binding.textEvent.text?.toString()?.trim()
+            if (content.isNullOrBlank()) {
+                binding.textEvent.error = getString(R.string.empty_field)
+                return@setOnMenuItemClickListener true
+            }
+            viewModel.createEvent(content)
+            true
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_new_event, container, false)
-    }
+    private fun setupObservers() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is NewEventUiState.Loading -> {}
+                        is NewEventUiState.Ready -> {}
+                        is NewEventUiState.Success -> {
+                            Toast.makeText(requireContext(), "Событие создано", Toast.LENGTH_SHORT).show()
+                            findNavController().navigateUp()
+                        }
+                        is NewEventUiState.Error -> {
+                            Snackbar.make(
+                                binding.root,
+                                getString(R.string.connection_error),
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        }
+                        is NewEventUiState.DateSelected -> {
+                            val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+                            val dateString = sdf.format(Date(state.timestamp))
+                            binding.buttonSetDate.contentDescription = dateString
+                            Toast.makeText(requireContext(), "Дата: $dateString", Toast.LENGTH_SHORT).show()
+                        }
+                        is NewEventUiState.LocationSelected -> {
+                            binding.mapContainer.visibility = View.VISIBLE
+                        }
+                        is NewEventUiState.LocationRemoved -> {
+                            binding.mapContainer.visibility = View.GONE
+                        }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment NewEventFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            NewEventFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                        is NewEventUiState.TypeSelected -> {}
+                    }
                 }
             }
+        }
+    }
+
+    private fun setupToolbar() {
+        binding.topAppBar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -3,6 +3,7 @@ package ru.netology.nework.domain.repository
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import ru.netology.nework.domain.model.Event
+import ru.netology.nework.domain.model.EventType
 
 interface EventsRepository {
 
@@ -10,7 +11,13 @@ interface EventsRepository {
 
     suspend fun getEvent(eventId: String): Result<Event>
 
-    suspend fun createEvent(event: Event): Result<Event>
+    suspend fun createEvent(
+        content: String,
+        type: EventType,
+        datetime: Long?,
+        coords: Pair<Double, Double>?,
+        speakerIds: List<String>
+    ): Result<Unit>
 
     suspend fun updateEvent(eventId: String, event: Event): Result<Event>
 

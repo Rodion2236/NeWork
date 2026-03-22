@@ -86,4 +86,7 @@
     <string name="like_count">%d</string>
     <string name="participants_count">Участники (%d)</string>
     <string name="event_not_found">Событие не найдено</string>
+    <string name="event_type">Тип события</string>
+    <string name="add_speakers">Добавить спикеров</string>
+    <string name="event_created">Событие создано</string>
 </resources>

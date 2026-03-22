@@ -87,4 +87,7 @@
     <string name="post_not_found">Post not found</string>
     <string name="participants_count">Participants (%d)</string>
     <string name="event_not_found">Event not found</string>
+    <string name="event_type">Event type</string>
+    <string name="add_speakers">Add speakers</string>
+    <string name="event_created">Event created</string>
 </resources>
