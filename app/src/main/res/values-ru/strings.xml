@@ -16,7 +16,8 @@
     <string name="password">Пароль</string>
     <string name="don_t_have_an_account_register">Нет аккаунта? Зарегистрироваться</string>
     <string name="registration">Регистрация</string>
-    <string name="name">Имя</string>
+    <string name="name"></string>
+    <string name="name_company">Название компании</string>
     <string name="passwords_dont_match">Пароли отличаются</string>
     <string name="the_user_is_already_registered">Пользователь уже зарегистрирован</string>
     <string name="incorrect_photo_format">Неверный формат фото</string>
@@ -89,4 +90,5 @@
     <string name="event_type">Тип события</string>
     <string name="add_speakers">Добавить спикеров</string>
     <string name="event_created">Событие создано</string>
+    <string name="present">н.в.</string>
 </resources>

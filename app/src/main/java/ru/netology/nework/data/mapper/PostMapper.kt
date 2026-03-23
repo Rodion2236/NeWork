@@ -1,9 +1,7 @@
 package ru.netology.nework.data.mapper
 
 import ru.netology.nework.data.remote.dto.PostDto
-import ru.netology.nework.data.remote.dto.UserPreviewDto
 import ru.netology.nework.domain.model.Post
-import ru.netology.nework.domain.model.UserPreview
 
 fun Post(dto: PostDto): Post = Post(
     id = dto.id.toString(),

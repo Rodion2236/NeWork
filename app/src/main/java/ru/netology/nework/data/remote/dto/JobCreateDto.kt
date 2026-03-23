@@ -2,8 +2,7 @@ package ru.netology.nework.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class JobDto(
-    @SerializedName("id") val id: Int,
+data class JobCreateDto(
     @SerializedName("name") val name: String,
     @SerializedName("position") val position: String?,
     @SerializedName("start") val start: String,

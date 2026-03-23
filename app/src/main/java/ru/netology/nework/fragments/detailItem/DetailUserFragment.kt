@@ -15,9 +15,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentDetailUserBinding
+import ru.netology.nework.fragments.item.JobsFragment
 import ru.netology.nework.presentation.users.DetailUserUiState
 import ru.netology.nework.presentation.users.DetailUserViewModel
-import ru.netology.nework.presentation.users.jobs.UserJobsFragment
 import ru.netology.nework.presentation.users.wall.UserWallFragment
 import ru.netology.nework.util.load
 
@@ -48,7 +48,13 @@ class DetailUserFragment : Fragment(R.layout.fragment_detail_user) {
                 val userId = viewModel.userId
                 return when (position) {
                     0 -> UserWallFragment.newInstance(userId)
-                    1 -> UserJobsFragment.newInstance(userId)
+                    1 -> {
+                        JobsFragment().apply {
+                            arguments = Bundle().apply {
+                                putString("userId", userId)
+                            }
+                        }
+                    }
                     else -> throw IllegalArgumentException("Invalid tab")
                 }
             }

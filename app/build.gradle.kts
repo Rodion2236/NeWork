@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.androidx.coordinatorlayout)
     implementation(libs.androidx.recyclerview)
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.10.0")
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)

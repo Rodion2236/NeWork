@@ -47,7 +47,8 @@ class DetailUserViewModel @Inject constructor(
 
     private fun loadJobs(userId: String) {
         viewModelScope.launch {
-            jobsRepository.getUserJobs(userId)
+            val userIdInt = userId.toIntOrNull() ?: return@launch
+            jobsRepository.getUserJobs(userIdInt)
                 .onSuccess { jobs ->
                     val currentState = _uiState.value
                     if (currentState is DetailUserUiState.Success) {

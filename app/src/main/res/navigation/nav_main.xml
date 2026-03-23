@@ -97,4 +97,9 @@
         app:destination="@id/detailUserFragment"
         app:popUpTo="@id/mainFragment"
         app:popUpToInclusive="false" />
+    <fragment
+        android:id="@+id/jobsFragment"
+        android:name="ru.netology.nework.fragments.item.JobsFragment"
+        android:label="fragment_jobs"
+        tools:layout="@layout/fragment_jobs" />
 </navigation>

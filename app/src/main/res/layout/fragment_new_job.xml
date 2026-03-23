@@ -35,7 +35,7 @@
                 style="?attr/textInputFilledStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/name"
+                android:hint="@string/name_company"
                 app:errorEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText

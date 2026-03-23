@@ -1,60 +1,122 @@
 package ru.netology.nework.fragments.newItem
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.netology.nework.R
+import ru.netology.nework.databinding.FragmentNewJobBinding
+import ru.netology.nework.presentation.newjob.NewJobViewModel
+import ru.netology.nework.presentation.newjobs.NewJobUiState
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+@AndroidEntryPoint
+class NewJobFragment : Fragment(R.layout.fragment_new_job) {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [NewJobFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class NewJobFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private val viewModel: NewJobViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private var _binding: FragmentNewJobBinding? = null
+    private val binding get() = _binding!!
+
+    private var startDate: Long? = null
+    private var endDate: Long? = null
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentNewJobBinding.bind(view)
+
+        setupClicks()
+        setupObservers()
+        setupToolbar()
+    }
+
+    private fun setupClicks() {
+        binding.startWork.setOnClickListener {
+            val datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText(getString(R.string.select_start_date))
+                .build()
+            datePicker.addOnPositiveButtonClickListener { timestamp ->
+                startDate = timestamp
+                binding.startWork.text = formatTimestamp(timestamp)
+            }
+            datePicker.show(parentFragmentManager, "START_DATE_PICKER")
+        }
+
+        binding.finishWork.setOnClickListener {
+            val datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText(getString(R.string.select_dates))
+                .build()
+            datePicker.addOnPositiveButtonClickListener { timestamp ->
+                endDate = timestamp
+                binding.finishWork.text = formatTimestamp(timestamp)
+            }
+            datePicker.show(parentFragmentManager, "END_DATE_PICKER")
+        }
+
+        binding.buttonJobCreate.setOnClickListener {
+            val name = binding.nameTextField.text?.toString()?.trim()
+            val position = binding.positionTextField.text?.toString()?.trim()
+            val link = binding.linkTextField.text?.toString()?.trim()
+
+            if (name.isNullOrBlank()) {
+                binding.nameLayout.error = getString(R.string.empty_field)
+                return@setOnClickListener
+            }
+
+            if (startDate == null) {
+                Toast.makeText(requireContext(), "Выберите дату начала", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            viewModel.createJob(name, position, startDate!!, endDate, link)
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_new_job, container, false)
-    }
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment NewJobFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            NewJobFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    private fun setupObservers() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is NewJobUiState.Loading -> {}
+                        is NewJobUiState.Ready -> {}
+                        is NewJobUiState.Success -> {
+                            Toast.makeText(requireContext(), "Работа создана", Toast.LENGTH_SHORT).show()
+                            findNavController().navigateUp()
+                        }
+                        is NewJobUiState.Error -> {
+                            Snackbar.make(
+                                binding.root,
+                                getString(R.string.connection_error),
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    private fun setupToolbar() {
+        binding.topAppBar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+    }
+
+    private fun formatTimestamp(timestamp: Long): String {
+        val sdf = java.text.SimpleDateFormat("dd.MM.yyyy", java.util.Locale.getDefault())
+        return sdf.format(java.util.Date(timestamp))
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
