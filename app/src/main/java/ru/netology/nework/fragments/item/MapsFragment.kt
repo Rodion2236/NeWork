@@ -1,60 +1,149 @@
 package ru.netology.nework.fragments.item
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
+import androidx.navigation.fragment.findNavController
+import com.yandex.mapkit.Animation
+import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.map.InputListener
+import com.yandex.mapkit.map.Map
+import com.yandex.mapkit.map.MapObjectCollection
+import com.yandex.mapkit.mapview.MapView
+import com.yandex.runtime.image.ImageProvider
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nework.R
+import ru.netology.nework.databinding.FragmentMapsBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+@AndroidEntryPoint
+class MapsFragment : Fragment(R.layout.fragment_maps) {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [MapsFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class MapsFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var _binding: FragmentMapsBinding? = null
+    private val binding get() = _binding!!
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private lateinit var mapView: MapView
+    private lateinit var placemarkCollection: MapObjectCollection
+    private var selectedPoint: Point = Point(55.751244, 37.618423)
+
+    companion object {
+        private const val TAG = "MapsFragment"
+        const val RESULT_KEY = "maps_result"
+        private const val KEY_LAT = "lat"
+        private const val KEY_LNG = "long"
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentMapsBinding.bind(view)
+
+        Log.d(TAG, "onViewCreated: initializing")
+
+        mapView = binding.map
+        MapKitFactory.initialize(requireContext())
+        mapView.onStart()
+        MapKitFactory.getInstance().onStart()
+
+        val map = mapView.map
+        placemarkCollection = map.mapObjects.addCollection()
+
+        setupToolbar()
+        setupMap(map)
+        setupListeners(map)
+
+        Log.d(TAG, "onViewCreated: ready")
+    }
+
+    private fun setupToolbar() {
+        binding.topAppBar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+        binding.topAppBar.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.save) {
+                Log.d(TAG, "Confirm clicked: lat=${selectedPoint.latitude}, lng=${selectedPoint.longitude}")
+                returnResult()
+                true
+            } else {
+                false
+            }
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_maps, container, false)
+    private fun setupMap(map: Map) {
+        Log.d(TAG, "setupMap: centering on $selectedPoint")
+        map.move(CameraPosition(selectedPoint, 15f, 0f, 0f))
+        addPlacemark(selectedPoint)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment MapsFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MapsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    private fun setupListeners(map: Map) {
+        Log.d(TAG, "setupListeners: adding InputListener")
+
+        map.isRotateGesturesEnabled = true
+        map.isZoomGesturesEnabled = true
+        map.isScrollGesturesEnabled = true
+
+        map.addInputListener(object : InputListener {
+            override fun onMapTap(map: Map, point: Point) {
+                Log.d(TAG, "onMapTap: lat=${point.latitude}, lng=${point.longitude}")
+                handlePointSelected(point, map)
             }
+
+            override fun onMapLongTap(map: Map, point: Point) {
+                Log.d(TAG, "onMapLongTap: lat=${point.latitude}, lng=${point.longitude}")
+                handlePointSelected(point, map)
+            }
+        })
+    }
+
+    private fun handlePointSelected(point: Point, map: Map) {
+        selectedPoint = point
+        updatePlacemark(point)
+        map.move(
+            CameraPosition(point, map.cameraPosition.zoom, 0f, 0f),
+            Animation(Animation.Type.SMOOTH, 0.3f),
+            null
+        )
+        Log.d(TAG, "Point selected: $point")
+    }
+
+    private fun addPlacemark(point: Point) {
+        placemarkCollection.addPlacemark().apply {
+            geometry = point
+            setIcon(ImageProvider.fromResource(requireContext(), R.drawable.ic_location_pin_24))
+        }
+    }
+
+    private fun updatePlacemark(point: Point) {
+        placemarkCollection.clear()
+        addPlacemark(point)
+    }
+
+    private fun returnResult() {
+        val result = Bundle().apply {
+            putDouble(KEY_LAT, selectedPoint.latitude)
+            putDouble(KEY_LNG, selectedPoint.longitude)
+        }
+        setFragmentResult(RESULT_KEY, result)
+        findNavController().navigateUp()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+        MapKitFactory.getInstance().onStart()
+    }
+
+    override fun onStop() {
+        mapView.onStop()
+        MapKitFactory.getInstance().onStop()
+        super.onStop()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

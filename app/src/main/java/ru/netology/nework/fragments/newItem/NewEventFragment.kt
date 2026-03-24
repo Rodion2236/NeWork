@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -32,6 +33,12 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentNewEventBinding.bind(view)
+
+        setFragmentResultListener("maps_result") { _, bundle ->
+            val lat = bundle.getDouble("lat")
+            val long = bundle.getDouble("long")
+            viewModel.onLocationSelected(lat, long)
+        }
 
         setupClicks()
         setupObservers()
@@ -62,7 +69,7 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
         }
 
         binding.addLocation.setOnClickListener {
-            findNavController().navigate(R.id.mapsFragment)
+            findNavController().navigate(R.id.action_global_to_mapsFragment)
         }
 
         binding.removeLocation.setOnClickListener {

@@ -17,17 +17,13 @@ class NewEventViewModel @Inject constructor(
     private val eventsRepository: EventsRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<NewEventUiState>(NewEventUiState.Loading)
+    private val _uiState = MutableStateFlow<NewEventUiState>(NewEventUiState.Ready)
     val uiState: StateFlow<NewEventUiState> = _uiState.asStateFlow()
 
     private var selectedType: EventType = EventType.ONLINE
     private var selectedDate: Long? = null
     private var locationCoords: Pair<Double, Double>? = null
     private var speakerIds: List<String> = emptyList()
-
-    init {
-        _uiState.value = NewEventUiState.Ready
-    }
 
     fun onTypeSelected(type: EventType) {
         selectedType = type

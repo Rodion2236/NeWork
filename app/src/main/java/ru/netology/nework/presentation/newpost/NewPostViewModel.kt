@@ -16,17 +16,13 @@ class NewPostViewModel @Inject constructor(
     private val postsRepository: PostsRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<NewPostUiState>(NewPostUiState.Loading)
+    private val _uiState = MutableStateFlow<NewPostUiState>(NewPostUiState.Ready)
     val uiState: StateFlow<NewPostUiState> = _uiState.asStateFlow()
 
     private var selectedImage: Uri? = null
     private var selectedFile: Uri? = null
     private var locationCoords: Pair<Double, Double>? = null
     private var mentionIds: List<String> = emptyList()
-
-    init {
-        _uiState.value = NewPostUiState.Ready
-    }
 
     fun onImageSelected(uri: Uri) {
         selectedImage = uri

@@ -79,7 +79,11 @@
         android:name="ru.netology.nework.fragments.item.MapsFragment"
         android:label="fragment_maps"
         tools:layout="@layout/fragment_maps" />
-
+    <fragment
+        android:id="@+id/jobsFragment"
+        android:name="ru.netology.nework.fragments.item.JobsFragment"
+        android:label="fragment_jobs"
+        tools:layout="@layout/fragment_jobs" />
     <action
         android:id="@+id/action_global_to_detailPostFragment"
         app:destination="@id/detailPostFragment"
@@ -97,9 +101,9 @@
         app:destination="@id/detailUserFragment"
         app:popUpTo="@id/mainFragment"
         app:popUpToInclusive="false" />
-    <fragment
-        android:id="@+id/jobsFragment"
-        android:name="ru.netology.nework.fragments.item.JobsFragment"
-        android:label="fragment_jobs"
-        tools:layout="@layout/fragment_jobs" />
+    <action
+        android:id="@+id/action_global_to_mapsFragment"
+        app:destination="@id/mapsFragment"
+        app:popUpTo="@id/mainFragment"
+        app:popUpToInclusive="false" />
 </navigation>

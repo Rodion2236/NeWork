@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -44,6 +45,12 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentNewPostBinding.bind(view)
 
+        setFragmentResultListener("maps_result") { _, bundle ->
+            val lat = bundle.getDouble("lat")
+            val long = bundle.getDouble("long")
+            viewModel.onLocationSelected(lat, long)
+        }
+
         setupClicks()
         setupObservers()
         setupToolbar()
@@ -64,7 +71,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         }
 
         binding.addLocation.setOnClickListener {
-            findNavController().navigate(R.id.mapsFragment)
+            findNavController().navigate(R.id.action_global_to_mapsFragment)
         }
 
         binding.removeImageAttachment.setOnClickListener {
