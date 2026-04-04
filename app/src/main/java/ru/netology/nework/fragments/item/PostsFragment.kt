@@ -22,6 +22,7 @@ import ru.netology.nework.domain.model.Post
 import ru.netology.nework.presentation.feed.FeedUiState
 import ru.netology.nework.presentation.feed.FeedViewModel
 import ru.netology.nework.presentation.feed.adapter.PostAdapter
+import ru.netology.nework.util.BundleKeys
 import ru.netology.nework.util.VideoPlayerManager
 import javax.inject.Inject
 
@@ -161,14 +162,15 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
 
     private fun openPostDetail(post: Post) {
         val bundle = Bundle().apply {
-            putString("postId", post.id)
+            putString(BundleKeys.POST_ID, post.id)
         }
         findNavController().navigate(R.id.action_global_to_detailPostFragment, bundle)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
         playerManager.release()
+        binding.recyclerViewPost.adapter = null
+        _binding = null
     }
 }

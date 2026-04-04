@@ -1,6 +1,7 @@
 package ru.netology.nework.presentation.auth
 
 import androidx.annotation.StringRes
+import ru.netology.nework.util.ValidationError as FieldError
 
 sealed class LoginUiState {
     object Idle : LoginUiState()
@@ -10,7 +11,7 @@ sealed class LoginUiState {
     data class Error(@StringRes val messageRes: Int) : LoginUiState()
 
     data class ValidationError(
-        val loginError: String? = null,
-        val passwordError: String? = null
+        val loginError: FieldError? = null,
+        val passwordError: FieldError? = null
     ) : LoginUiState()
 }

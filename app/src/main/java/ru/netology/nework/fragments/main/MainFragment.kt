@@ -12,6 +12,7 @@ import ru.netology.nework.databinding.FragmentMainBinding
 import ru.netology.nework.fragments.item.EventsFragment
 import ru.netology.nework.fragments.item.PostsFragment
 import ru.netology.nework.fragments.item.UserFragment
+import ru.netology.nework.util.BundleKeys
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -70,18 +71,12 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         Log.d("MainFragment", "Navigating to profile with userId: $currentUserId")
 
         val bundle = Bundle().apply {
-            putString("userId", currentUserId)
+            putString(BundleKeys.USER_ID, currentUserId)
         }
-
-        try {
-            findNavController().navigate(
-                R.id.action_global_to_detailUserFragment,
-                bundle
-            )
-            Log.d("MainFragment", "Navigation successful")
-        } catch (e: Exception) {
-            Log.e("MainFragment", "Navigation failed", e)
-        }
+        findNavController().navigate(
+            R.id.action_global_to_detailUserFragment,
+            bundle
+        )
     }
 
     private fun switchChildFragment(fragment: Fragment) {

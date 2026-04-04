@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.netology.nework.domain.model.Job
 import ru.netology.nework.domain.repository.UsersRepository
+import ru.netology.nework.util.BundleKeys
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,7 +19,7 @@ class UserJobsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val userId: String = savedStateHandle["userId"] ?: ""
+    private val userId: String = savedStateHandle[BundleKeys.USER_ID] ?: ""
 
     private val _jobs = MutableStateFlow<List<Job>>(emptyList())
     val jobs: StateFlow<List<Job>> = _jobs.asStateFlow()

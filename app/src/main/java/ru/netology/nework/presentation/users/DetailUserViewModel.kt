@@ -12,6 +12,7 @@ import ru.netology.nework.domain.model.Job
 import ru.netology.nework.domain.model.User
 import ru.netology.nework.domain.repository.JobsRepository
 import ru.netology.nework.domain.repository.UsersRepository
+import ru.netology.nework.util.BundleKeys
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,8 +22,7 @@ class DetailUserViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val userId: String = savedStateHandle["userId"] ?: ""
-
+    val userId: String = savedStateHandle[BundleKeys.USER_ID] ?: ""
     private val _uiState = MutableStateFlow<DetailUserUiState>(DetailUserUiState.Loading)
     val uiState: StateFlow<DetailUserUiState> = _uiState.asStateFlow()
 

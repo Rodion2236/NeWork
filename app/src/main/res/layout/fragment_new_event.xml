@@ -145,5 +145,6 @@
         app:layout_constraintBottom_toBottomOf="@id/bottomBar"
         app:layout_constraintEnd_toEndOf="@id/bottomBar"
         app:layout_constraintTop_toTopOf="@id/bottomBar"
-        app:srcCompat="@drawable/ic_add_24" />
+        android:contentDescription="@string/select_event_type_and_date"
+        app:srcCompat="@drawable/ic_event_24" />
 </androidx.constraintlayout.widget.ConstraintLayout>

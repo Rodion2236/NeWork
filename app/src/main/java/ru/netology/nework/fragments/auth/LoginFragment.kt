@@ -20,6 +20,7 @@ import ru.netology.nework.presentation.auth.LoginUiState.Success
 import ru.netology.nework.presentation.auth.LoginUiState.ValidationError
 import ru.netology.nework.presentation.auth.LoginViewModel
 import ru.netology.nework.util.AndroidUtils.hideKeyboard
+import ru.netology.nework.util.ValidationError as FieldError
 import ru.netology.nework.util.onTextChanged
 
 @AndroidEntryPoint
@@ -60,21 +61,17 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
                         is ValidationError -> {
                             setLoading(false)
-                            state.loginError?.let {
-                                binding.loginLayout.error = getString(
-                                    when (it) {
-                                        "empty_login" -> R.string.empty_login
-                                        else -> R.string.empty_field
-                                    }
-                                )
+                            state.loginError?.let { error ->
+                                binding.loginLayout.error = when (error) {
+                                    is FieldError.EmptyLogin -> getString(R.string.empty_login)
+                                    else -> getString(R.string.empty_field)
+                                }
                             }
-                            state.passwordError?.let {
-                                binding.passwordLayout.error = getString(
-                                    when (it) {
-                                        "empty_password" -> R.string.empty_password
-                                        else -> R.string.empty_field
-                                    }
-                                )
+                            state.passwordError?.let { error ->
+                                binding.passwordLayout.error = when (error) {
+                                    is FieldError.EmptyPassword -> getString(R.string.empty_password)
+                                    else -> getString(R.string.empty_field)
+                                }
                             }
                         }
 

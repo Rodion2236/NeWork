@@ -19,6 +19,7 @@ import ru.netology.nework.fragments.item.JobsFragment
 import ru.netology.nework.presentation.users.DetailUserUiState
 import ru.netology.nework.presentation.users.DetailUserViewModel
 import ru.netology.nework.presentation.users.wall.UserWallFragment
+import ru.netology.nework.util.BundleKeys
 import ru.netology.nework.util.load
 
 @AndroidEntryPoint
@@ -51,7 +52,7 @@ class DetailUserFragment : Fragment(R.layout.fragment_detail_user) {
                     1 -> {
                         JobsFragment().apply {
                             arguments = Bundle().apply {
-                                putString("userId", userId)
+                                putString(BundleKeys.USER_ID, userId)
                             }
                         }
                     }

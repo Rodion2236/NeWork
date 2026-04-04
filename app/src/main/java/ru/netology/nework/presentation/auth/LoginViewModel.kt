@@ -12,6 +12,7 @@ import ru.netology.nework.domain.repository.AuthRepository
 import ru.netology.nework.error.ApiError
 import ru.netology.nework.error.AppError
 import ru.netology.nework.error.NetworkError
+import ru.netology.nework.util.ValidationError as FieldError
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,13 +21,13 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
     private val _state = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val state: StateFlow<LoginUiState> = _state.asStateFlow()
 
-    fun validateLogin(login: String): String? = when {
-        login.isBlank() -> "empty_login"
+    fun validateLogin(login: String): FieldError? = when {
+        login.isBlank() -> FieldError.EmptyLogin
         else -> null
     }
 
-    fun validatePassword(password: String): String? = when {
-        password.isBlank() -> "empty_password"
+    fun validatePassword(password: String): FieldError? = when {
+        password.isBlank() -> FieldError.EmptyPassword
         else -> null
     }
 

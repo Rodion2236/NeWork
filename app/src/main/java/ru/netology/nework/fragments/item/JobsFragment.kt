@@ -21,6 +21,7 @@ import ru.netology.nework.databinding.FragmentJobsBinding
 import ru.netology.nework.domain.model.Job
 import ru.netology.nework.presentation.jobs.JobsUiState
 import ru.netology.nework.presentation.jobs.JobsViewModel
+import ru.netology.nework.util.BundleKeys
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
@@ -40,7 +41,7 @@ class JobsFragment : Fragment(R.layout.fragment_jobs) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentJobsBinding.bind(view)
 
-        val userId = arguments?.getString("userId") ?: ""
+        val userId = arguments?.getString(BundleKeys.USER_ID) ?: ""
         val currentUserId = tokenStorage.getUserId() ?: ""
 
         viewModel.setProfileIds(userId, currentUserId)

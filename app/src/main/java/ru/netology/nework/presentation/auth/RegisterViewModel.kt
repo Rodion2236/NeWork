@@ -13,6 +13,7 @@ import ru.netology.nework.domain.repository.AuthRepository
 import ru.netology.nework.error.ApiError
 import ru.netology.nework.error.AppError
 import ru.netology.nework.error.NetworkError
+import ru.netology.nework.util.ValidationError as FieldError
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,30 +24,30 @@ class RegisterViewModel @Inject constructor(
     private val _state = MutableStateFlow<RegisterUiState>(RegisterUiState.Idle)
     val state: StateFlow<RegisterUiState> = _state.asStateFlow()
 
-    fun validateLogin(login: String): String? = when {
-        login.isBlank() -> "empty_login"
-        login.length < 3 -> "login_too_short"
+    fun validateLogin(login: String): FieldError? = when {
+        login.isBlank() -> FieldError.EmptyLogin
+        login.length < 3 -> FieldError.LoginTooShort
         else -> null
     }
 
-    fun validateName(name: String): String? = when {
-        name.isBlank() -> "name_is_empty"
+    fun validateName(name: String): FieldError? = when {
+        name.isBlank() -> FieldError.EmptyName
         else -> null
     }
 
-    fun validatePassword(password: String): String? = when {
-        password.isBlank() -> "empty_password"
-        password.length < 6 -> "password_too_short"
+    fun validatePassword(password: String): FieldError? = when {
+        password.isBlank() -> FieldError.EmptyPassword
+        password.length < 6 -> FieldError.PasswordTooShort
         else -> null
     }
 
-    fun validateRepeatPassword(password: String, repeat: String): String? = when {
-        repeat.isBlank() -> "empty_password"
-        password != repeat -> "passwords_don't_match"
+    fun validateRepeatPassword(password: String, repeat: String): FieldError? = when {
+        repeat.isBlank() -> FieldError.EmptyPassword
+        password != repeat -> FieldError.PasswordsDontMatch
         else -> null
     }
 
-    fun validateAvatar(uri: Uri?): String? = when {
+    fun validateAvatar(uri: Uri?): FieldError? = when {
         uri == null -> null
         else -> null
     }
@@ -55,8 +56,13 @@ class RegisterViewModel @Inject constructor(
         _state.value = RegisterUiState.AvatarSelected(uri)
     }
 
-
-    fun onRegisterClicked(login: String, name: String, password: String, repeatPassword: String, avatarUri: Uri?) {
+    fun onRegisterClicked(
+        login: String,
+        name: String,
+        password: String,
+        repeatPassword: String,
+        avatarUri: Uri?
+    ) {
         val errors = RegisterUiState.ValidationError(
             loginError = validateLogin(login),
             nameError = validateName(name),
@@ -73,8 +79,7 @@ class RegisterViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.value = RegisterUiState.Loading
-
-            authRepository.register(login, password, name)
+            authRepository.register(login, password, name, avatarUri)
                 .onSuccess {
                     _state.value = RegisterUiState.Success
                 }

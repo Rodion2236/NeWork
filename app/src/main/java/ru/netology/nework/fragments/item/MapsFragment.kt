@@ -28,6 +28,17 @@ class MapsFragment : Fragment(R.layout.fragment_maps) {
     private lateinit var mapView: MapView
     private lateinit var placemarkCollection: MapObjectCollection
     private var selectedPoint: Point = Point(55.751244, 37.618423)
+    private val inputListener = object : InputListener {
+        override fun onMapTap(map: Map, point: Point) {
+            Log.d(TAG, "onMapTap: lat=${point.latitude}, lng=${point.longitude}")
+            handlePointSelected(point, map)
+        }
+
+        override fun onMapLongTap(map: Map, point: Point) {
+            Log.d(TAG, "onMapLongTap: lat=${point.latitude}, lng=${point.longitude}")
+            handlePointSelected(point, map)
+        }
+    }
 
     companion object {
         private const val TAG = "MapsFragment"
@@ -39,8 +50,6 @@ class MapsFragment : Fragment(R.layout.fragment_maps) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentMapsBinding.bind(view)
-
-        Log.d(TAG, "onViewCreated: initializing")
 
         mapView = binding.map
         MapKitFactory.initialize(requireContext())
@@ -85,17 +94,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps) {
         map.isZoomGesturesEnabled = true
         map.isScrollGesturesEnabled = true
 
-        map.addInputListener(object : InputListener {
-            override fun onMapTap(map: Map, point: Point) {
-                Log.d(TAG, "onMapTap: lat=${point.latitude}, lng=${point.longitude}")
-                handlePointSelected(point, map)
-            }
-
-            override fun onMapLongTap(map: Map, point: Point) {
-                Log.d(TAG, "onMapLongTap: lat=${point.latitude}, lng=${point.longitude}")
-                handlePointSelected(point, map)
-            }
-        })
+        map.addInputListener(inputListener)
     }
 
     private fun handlePointSelected(point: Point, map: Map) {

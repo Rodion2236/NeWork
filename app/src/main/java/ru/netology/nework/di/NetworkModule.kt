@@ -14,6 +14,7 @@ import ru.netology.nework.data.remote.api.JobsApi
 import ru.netology.nework.data.remote.api.PostsApi
 import ru.netology.nework.data.remote.api.UsersApi
 import ru.netology.nework.data.remote.interceptor.ApiKeyInterceptor
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -32,11 +33,15 @@ object NetworkModule {
     fun provideOkHttpClient(
         apiKeyInterceptor: ApiKeyInterceptor,
         loggingInterceptor: HttpLoggingInterceptor
-    ): OkHttpClient =
-        OkHttpClient.Builder()
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(apiKeyInterceptor)
             .addInterceptor(loggingInterceptor)
             .build()
+    }
 
     @Provides
     @Singleton

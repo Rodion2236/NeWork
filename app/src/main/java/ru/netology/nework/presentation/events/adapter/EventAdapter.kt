@@ -268,12 +268,26 @@ class AudioEventViewHolder(
 ) : EventViewHolder(binding, onLikeClick, onEventClick, onMenuClick) {
 
     private var currentEventId: String? = null
+    private var currentAudioUrl: String? = null
     private var isBound = false
+
+    init {
+        binding.playPauseAudio.setOnClickListener {
+            currentAudioUrl?.let { url ->
+                if (playerManager.isPlaying() && currentEventId != null) {
+                    playerManager.pause()
+                } else {
+                    playerManager.setMediaUrl(url)
+                    playerManager.play()
+                }
+                updatePlayButtonIcon()
+            }
+        }
+    }
 
     override fun bind(event: Event) {
         binding.authorName.text = event.author
         binding.content.text = event.content
-
         binding.typeEvent.text = when (event.type) {
             EventType.ONLINE -> binding.root.context.getString(R.string.online)
             EventType.OFFLINE -> binding.root.context.getString(R.string.offline)
@@ -288,35 +302,14 @@ class AudioEventViewHolder(
         binding.audioContent.visibility = View.VISIBLE
         binding.buttonPlayEvent.visibility = if (event.type == EventType.ONLINE) View.VISIBLE else View.GONE
 
-        setupAudioPlayer(event, event.attachment?.url?.trim())
+        currentEventId = event.id
+        currentAudioUrl = event.attachment?.url?.trim()
+        isBound = true
 
         binding.buttonLike.isChecked = event.likedByMe
         binding.likeCount.text = event.likeCount.toString()
         enableLinks(binding.content)
         setupClicks(event)
-    }
-
-    private fun setupAudioPlayer(event: Event, url: String?) {
-        currentEventId = event.id
-        isBound = true
-
-        binding.playPauseAudio.setOnClickListener {
-            if (!url.isNullOrBlank()) {
-                if (playerManager.isPlaying() && currentEventId == event.id) {
-                    playerManager.pause()
-                } else {
-                    playerManager.setMediaUrl(url)
-                    playerManager.play()
-                }
-                updatePlayButtonIcon()
-            }
-        }
-
-        playerManager.onPlaybackStateChanged = { isPlaying ->
-            if (isBound && currentEventId == event.id) {
-                updatePlayButtonIcon()
-            }
-        }
         updatePlayButtonIcon()
     }
 
@@ -333,7 +326,6 @@ class AudioEventViewHolder(
 
     fun detachAudio() {
         isBound = false
-        playerManager.onPlaybackStateChanged = null
     }
 
     override fun onViewRecycled() {

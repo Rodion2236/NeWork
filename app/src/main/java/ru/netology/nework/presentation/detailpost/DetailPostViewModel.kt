@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.netology.nework.domain.repository.PostsRepository
+import ru.netology.nework.util.BundleKeys
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,7 +18,7 @@ class DetailPostViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val postId: String = savedStateHandle["postId"] ?: ""
+    private val postId: String = savedStateHandle[BundleKeys.POST_ID] ?: ""
 
     private val _uiState = MutableStateFlow<DetailPostUiState>(DetailPostUiState.Loading)
     val uiState: StateFlow<DetailPostUiState> = _uiState.asStateFlow()

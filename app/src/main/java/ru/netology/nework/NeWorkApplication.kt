@@ -13,6 +13,7 @@ class NeWorkApplication : Application() {
         val mapKitKey = BuildConfig.YANDEX_MAPKIT_KEY
         if (mapKitKey.isNotBlank()) {
             MapKitFactory.setApiKey(mapKitKey)
+            MapKitFactory.initialize(this)
         }
     }
 }

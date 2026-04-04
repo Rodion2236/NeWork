@@ -38,6 +38,7 @@ class DetailPostFragment : Fragment(R.layout.fragment_detail_post) {
 
     private var _binding: FragmentDetailPostBinding? = null
     private val binding get() = _binding!!
+    private var currentAudioUrl: String? = null
 
     private val likersAdapter: AvatarAdapter by lazy { AvatarAdapter() }
     private val mentionedAdapter: AvatarAdapter by lazy { AvatarAdapter() }
@@ -160,17 +161,7 @@ class DetailPostFragment : Fragment(R.layout.fragment_detail_post) {
                 binding.videoContent.visibility = View.GONE
                 binding.audioContent.visibility = View.VISIBLE
 
-                val audioUrl = post.attachment.url?.trim()
-                if (!audioUrl.isNullOrBlank()) {
-                    binding.playPauseAudio.setOnClickListener {
-                        if (playerManager.isPlaying()) {
-                            playerManager.pause()
-                        } else {
-                            playerManager.setMediaUrl(audioUrl)
-                            playerManager.play()
-                        }
-                    }
-                }
+                currentAudioUrl = post.attachment.url?.trim()
             }
             else -> {
                 binding.imageContent.visibility = View.GONE
@@ -209,14 +200,28 @@ class DetailPostFragment : Fragment(R.layout.fragment_detail_post) {
     }
 
     private fun setupClicks() {
-        binding.buttonLike.setOnClickListener {
-            viewModel.toggleLike()
+        binding.buttonLike.setOnClickListener { viewModel.toggleLike() }
+
+        binding.playPauseAudio.setOnClickListener {
+            if (playerManager.isPlaying()) {
+                playerManager.pause()
+            } else {
+                currentAudioUrl?.let { url ->
+                    playerManager.setMediaUrl(url)
+                    playerManager.play()
+                }
+            }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
         playerManager.release()
+        binding.videoContent.player = null
+        binding.recyclerLikers.adapter = null
+        binding.recyclerMentioned.adapter = null
+        currentAudioUrl = null
+        _binding = null
+
     }
 }

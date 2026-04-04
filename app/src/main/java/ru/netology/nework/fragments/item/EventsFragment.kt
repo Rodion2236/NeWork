@@ -22,6 +22,7 @@ import ru.netology.nework.domain.model.Event
 import ru.netology.nework.presentation.events.EventsUiState
 import ru.netology.nework.presentation.events.EventsViewModel
 import ru.netology.nework.presentation.events.adapter.EventAdapter
+import ru.netology.nework.util.BundleKeys
 import ru.netology.nework.util.VideoPlayerManager
 import javax.inject.Inject
 
@@ -160,14 +161,15 @@ class EventsFragment : Fragment(R.layout.fragment_event) {
 
     private fun openEventDetail(event: Event) {
         val bundle = Bundle().apply {
-            putString("eventId", event.id)
+            putString(BundleKeys.EVENT_ID, event.id)
         }
         findNavController().navigate(R.id.action_global_to_detailEventFragment, bundle)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
         playerManager.release()
+        binding.recyclerViewEvent.adapter = null
+        _binding = null
     }
 }

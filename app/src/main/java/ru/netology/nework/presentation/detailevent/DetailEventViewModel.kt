@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.netology.nework.domain.repository.EventsRepository
+import ru.netology.nework.util.BundleKeys
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,7 +18,7 @@ class DetailEventViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val eventId: String = savedStateHandle["eventId"] ?: ""
+    private val eventId: String = savedStateHandle[BundleKeys.EVENT_ID] ?: ""
 
     private val _uiState = MutableStateFlow<DetailEventUiState>(DetailEventUiState.Loading)
     val uiState: StateFlow<DetailEventUiState> = _uiState.asStateFlow()

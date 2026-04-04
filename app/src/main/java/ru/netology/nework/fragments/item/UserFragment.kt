@@ -18,6 +18,7 @@ import ru.netology.nework.domain.model.User
 import ru.netology.nework.presentation.users.UsersUiState
 import ru.netology.nework.presentation.users.UsersViewModel
 import ru.netology.nework.presentation.users.adapter.UserAdapter
+import ru.netology.nework.util.BundleKeys
 
 @AndroidEntryPoint
 class UserFragment : Fragment(R.layout.fragment_user) {
@@ -96,7 +97,7 @@ class UserFragment : Fragment(R.layout.fragment_user) {
 
     private fun openUserDetail(user: User) {
         val bundle = Bundle().apply {
-            putString("userId", user.id)
+            putString(BundleKeys.USER_ID, user.id)
         }
         findNavController().navigate(R.id.action_global_to_detailUserFragment, bundle)
     }

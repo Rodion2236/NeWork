@@ -10,14 +10,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentNewEventBinding
+import ru.netology.nework.fragments.dialog.BottomSheetDialogFragment
 import ru.netology.nework.presentation.newevent.NewEventUiState
 import ru.netology.nework.presentation.newevent.NewEventViewModel
+import ru.netology.nework.util.BundleKeys
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -34,10 +35,25 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentNewEventBinding.bind(view)
 
-        setFragmentResultListener("maps_result") { _, bundle ->
-            val lat = bundle.getDouble("lat")
-            val long = bundle.getDouble("long")
+        setFragmentResultListener(BundleKeys.MAPS_RESULT) { _, bundle ->
+            val lat = bundle.getDouble(BundleKeys.LAT)
+            val long = bundle.getDouble(BundleKeys.LNG)
             viewModel.onLocationSelected(lat, long)
+        }
+
+        setFragmentResultListener(BottomSheetDialogFragment.RESULT_KEY) { _, bundle ->
+            bundle.getString(BundleKeys.EVENT_TYPE)?.let { typeStr ->
+                runCatching { ru.netology.nework.domain.model.EventType.valueOf(typeStr) }
+                    .onSuccess { type ->
+                        viewModel.onTypeSelected(type)
+                    }
+            }
+
+            bundle.getLong(BundleKeys.EVENT_DATETIME, 0L).takeIf { it > 0 }?.let { timestamp ->
+                viewModel.onDateSelected(timestamp)
+                binding.buttonSetDate.contentDescription = formatTimestampForUi(timestamp)
+                Toast.makeText(requireContext(), "Дата: ${formatTimestampForUi(timestamp)}", Toast.LENGTH_SHORT).show()
+            }
         }
 
         setupClicks()
@@ -47,13 +63,7 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
 
     private fun setupClicks() {
         binding.buttonSetDate.setOnClickListener {
-            val datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText(getString(R.string.select_date))
-                .build()
-            datePicker.addOnPositiveButtonClickListener { timestamp: Long ->
-                viewModel.onDateSelected(timestamp)
-            }
-            datePicker.show(parentFragmentManager, "DATE_PICKER")
+            BottomSheetDialogFragment().show(parentFragmentManager, BottomSheetDialogFragment.TAG)
         }
 
         binding.addPhoto.setOnClickListener {
@@ -109,20 +119,16 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
                                 Snackbar.LENGTH_SHORT
                             ).show()
                         }
-                        is NewEventUiState.DateSelected -> {
-                            val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-                            val dateString = sdf.format(Date(state.timestamp))
-                            binding.buttonSetDate.contentDescription = dateString
-                            Toast.makeText(requireContext(), "Дата: $dateString", Toast.LENGTH_SHORT).show()
-                        }
+                        is NewEventUiState.DateSelected -> {}
                         is NewEventUiState.LocationSelected -> {
                             binding.mapContainer.visibility = View.VISIBLE
                         }
                         is NewEventUiState.LocationRemoved -> {
                             binding.mapContainer.visibility = View.GONE
                         }
-
-                        is NewEventUiState.TypeSelected -> {}
+                        is NewEventUiState.TypeSelected -> {
+                            Toast.makeText(requireContext(), "Тип: ${state.type}", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
@@ -133,6 +139,11 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
         binding.topAppBar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
+    }
+
+    private fun formatTimestampForUi(timestamp: Long): String {
+        val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        return sdf.format(Date(timestamp))
     }
 
     override fun onDestroyView() {

@@ -23,6 +23,7 @@ import ru.netology.nework.presentation.auth.RegisterUiState.Success
 import ru.netology.nework.presentation.auth.RegisterUiState.ValidationError
 import ru.netology.nework.presentation.auth.RegisterViewModel
 import ru.netology.nework.util.AndroidUtils.hideKeyboard
+import ru.netology.nework.util.ValidationError as FieldError
 import ru.netology.nework.util.onTextChanged
 
 @AndroidEntryPoint
@@ -76,39 +77,31 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
 
                         is ValidationError -> {
                             setLoading(false)
-                            state.loginError?.let {
-                                binding.loginLayout.error = getString(
-                                    when (it) {
-                                        "empty_login" -> R.string.empty_login
-                                        "incorrect_login" -> R.string.incorrect_login
-                                        else -> R.string.empty_field
-                                    }
-                                )
+                            state.loginError?.let { error ->
+                                binding.loginLayout.error = when (error) {
+                                    is FieldError.EmptyLogin -> getString(R.string.empty_login)
+                                    is FieldError.LoginTooShort -> getString(R.string.login_too_short)
+                                    else -> getString(R.string.empty_field)
+                                }
                             }
-                            state.nameError?.let {
-                                binding.nameLayout.error = getString(
-                                    when (it) {
-                                        "name_is_empty" -> R.string.name_is_empty
-                                        else -> R.string.empty_field
-                                    }
-                                )
+                            state.nameError?.let { error ->
+                                binding.nameLayout.error = when (error) {
+                                    is FieldError.EmptyName -> getString(R.string.name_is_empty)
+                                    else -> getString(R.string.empty_field)
+                                }
                             }
-                            state.passwordError?.let {
-                                binding.passLayout.error = getString(
-                                    when (it) {
-                                        "empty_password" -> R.string.empty_password
-                                        "incorrect_password" -> R.string.incorrect_password
-                                        else -> R.string.empty_field
-                                    }
-                                )
+                            state.passwordError?.let { error ->
+                                binding.passLayout.error = when (error) {
+                                    is FieldError.EmptyPassword -> getString(R.string.empty_password)
+                                    is FieldError.PasswordTooShort -> getString(R.string.password_too_short)
+                                    else -> getString(R.string.empty_field)
+                                }
                             }
-                            state.repeatPasswordError?.let {
-                                binding.repeatPassLayout.error = getString(
-                                    when (it) {
-                                        "passwords_don't_match" -> R.string.passwords_dont_match
-                                        else -> R.string.empty_field
-                                    }
-                                )
+                            state.repeatPasswordError?.let { error ->
+                                binding.repeatPassLayout.error = when (error) {
+                                    is FieldError.PasswordsDontMatch -> getString(R.string.passwords_dont_match)
+                                    else -> getString(R.string.empty_field)
+                                }
                             }
                         }
 

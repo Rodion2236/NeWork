@@ -263,7 +263,22 @@ class AudioPostViewHolder(
 ) : PostViewHolder(binding, onLikeClick, onPostClick, onMenuClick, currentUserId) {
 
     private var currentPostId: String? = null
+    private var currentAudioUrl: String? = null
     private var isBound = false
+
+    init {
+        binding.playPauseAudio.setOnClickListener {
+            currentAudioUrl?.let { url ->
+                if (playerManager.isPlaying() && currentPostId != null) {
+                    playerManager.pause()
+                } else {
+                    playerManager.setMediaUrl(url)
+                    playerManager.play()
+                }
+                updatePlayButtonIcon()
+            }
+        }
+    }
 
     override fun bind(post: Post) {
         binding.authorName.text = post.author
@@ -276,7 +291,9 @@ class AudioPostViewHolder(
         binding.videoContent.visibility = View.GONE
         binding.audioContent.visibility = View.VISIBLE
 
-        setupAudioPlayer(post)
+        currentPostId = post.id
+        currentAudioUrl = post.attachment?.url?.trim()
+        isBound = true
 
         binding.buttonLike.isChecked = post.likedByMe
         binding.likeCount.text = post.likeCount.toString()
@@ -288,29 +305,6 @@ class AudioPostViewHolder(
 
         enableLinks(binding.content)
         setupClicks(post)
-    }
-
-    private fun setupAudioPlayer(post: Post) {
-        currentPostId = post.id
-        isBound = true
-
-        binding.playPauseAudio.setOnClickListener {
-            if (post.attachment?.url != null) {
-                if (playerManager.isPlaying() && currentPostId == post.id) {
-                    playerManager.pause()
-                } else {
-                    playerManager.setMediaUrl(post.attachment.url)
-                    playerManager.play()
-                }
-                updatePlayButtonIcon()
-            }
-        }
-
-        playerManager.onPlaybackStateChanged = { isPlaying ->
-            if (isBound && currentPostId == post.id) {
-                updatePlayButtonIcon()
-            }
-        }
         updatePlayButtonIcon()
     }
 
@@ -327,7 +321,6 @@ class AudioPostViewHolder(
 
     fun detachAudio() {
         isBound = false
-        playerManager.onPlaybackStateChanged = null
     }
 
     override fun onViewRecycled() {

@@ -19,6 +19,7 @@ import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentNewPostBinding
 import ru.netology.nework.presentation.newpost.NewPostUiState
 import ru.netology.nework.presentation.newpost.NewPostViewModel
+import ru.netology.nework.util.BundleKeys
 import ru.netology.nework.util.load
 
 @AndroidEntryPoint
@@ -45,9 +46,9 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentNewPostBinding.bind(view)
 
-        setFragmentResultListener("maps_result") { _, bundle ->
-            val lat = bundle.getDouble("lat")
-            val long = bundle.getDouble("long")
+        setFragmentResultListener(BundleKeys.MAPS_RESULT) { _, bundle ->
+            val lat = bundle.getDouble(BundleKeys.LAT)
+            val long = bundle.getDouble(BundleKeys.LNG)
             viewModel.onLocationSelected(lat, long)
         }
 
