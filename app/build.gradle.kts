@@ -9,8 +9,8 @@ if (apiKeyPropertiesFile.exists()) {
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
     id("com.google.gms.google-services")
     id("androidx.navigation.safeargs.kotlin")
 }
@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.10.0")
+    implementation("com.github.bumptech.glide:okhttp3-integration:4.16.0")
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
