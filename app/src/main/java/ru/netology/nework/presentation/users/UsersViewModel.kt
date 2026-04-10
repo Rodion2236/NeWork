@@ -2,13 +2,11 @@ package ru.netology.nework.presentation.users
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import ru.netology.nework.domain.model.User
 import ru.netology.nework.domain.repository.UsersRepository
 import javax.inject.Inject
@@ -18,11 +16,18 @@ class UsersViewModel @Inject constructor(
     private val usersRepository: UsersRepository
 ) : ViewModel() {
 
-    val users: Flow<PagingData<User>> = usersRepository.getUsers()
-        .cachedIn(viewModelScope)
+    private val _users = MutableStateFlow<List<User>>(emptyList())
+    val users: StateFlow<List<User>> = _users.asStateFlow()
 
-    private val _uiState = MutableStateFlow<UsersUiState>(UsersUiState.Idle)
-    val uiState: StateFlow<UsersUiState> = _uiState.asStateFlow()
+    init {
+        refresh()
+    }
 
-    fun refresh() {}
+    fun refresh() {
+        viewModelScope.launch {
+            usersRepository.getUsers().collect { users ->
+                _users.value = users
+            }
+        }
+    }
 }

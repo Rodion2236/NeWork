@@ -1,12 +1,11 @@
 package ru.netology.nework.data.repository
 
-import android.util.Log
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import ru.netology.nework.data.mapper.Job
 import ru.netology.nework.data.mapper.Post
-import ru.netology.nework.data.mapper.User
+import ru.netology.nework.data.mapper.User as UserMapper
 import ru.netology.nework.data.remote.api.UsersApi
 import ru.netology.nework.domain.model.Job
 import ru.netology.nework.domain.model.Post
@@ -20,15 +19,18 @@ class UsersRepositoryImpl @Inject constructor(
     private val usersApi: UsersApi
 ) : UsersRepository {
 
-    override fun getUsers(): Flow<PagingData<User>> = flow {
+    override fun getUsers(): Flow<List<User>> = flow {
         try {
             val response = usersApi.getUsers()
-            if (!response.isSuccessful) throw ApiError(response.code(), "users_error")
-            val usersDto = response.body() ?: throw ApiError(response.code(), "empty_response")
-            emit(PagingData.from(usersDto.map { User(it) }))
+            if (!response.isSuccessful) {
+                emit(emptyList())
+                return@flow
+            }
+            val usersDto = response.body() ?: emptyList()
+            val users = usersDto.map { UserMapper(it) }
+            emit(users)
         } catch (e: Exception) {
-            Log.e("UsersRepository", "getUsers failed", e)
-            emit(PagingData.from(emptyList()))
+            emit(emptyList())
         }
     }
 
@@ -37,9 +39,8 @@ class UsersRepositoryImpl @Inject constructor(
             val response = usersApi.getUser(userId)
             if (!response.isSuccessful) throw ApiError(response.code(), "user_not_found")
             val userDto = response.body() ?: throw ApiError(response.code(), "empty_response")
-            Result.success(User(userDto))
+            Result.success(UserMapper(userDto))
         } catch (e: Exception) {
-            Log.e("UsersRepository", "getUser failed", e)
             Result.failure(AppError.from(e))
         }
     }
@@ -51,7 +52,6 @@ class UsersRepositoryImpl @Inject constructor(
             val postsDto = response.body() ?: throw ApiError(response.code(), "empty_response")
             emit(PagingData.from(postsDto.map { Post(it) }))
         } catch (e: Exception) {
-            Log.e("UsersRepository", "getUserWall failed", e)
             emit(PagingData.from(emptyList()))
         }
     }
@@ -63,7 +63,6 @@ class UsersRepositoryImpl @Inject constructor(
             val jobsDto = response.body() ?: throw ApiError(response.code(), "empty_response")
             Result.success(jobsDto.map { Job(it) })
         } catch (e: Exception) {
-            Log.e("UsersRepository", "getUserJobs failed", e)
             Result.failure(AppError.from(e))
         }
     }

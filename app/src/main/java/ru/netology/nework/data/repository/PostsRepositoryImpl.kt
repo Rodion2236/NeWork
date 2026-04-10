@@ -1,12 +1,14 @@
 package ru.netology.nework.data.repository
 
 import android.net.Uri
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import ru.netology.nework.BuildConfig
 import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.data.mapper.Post
+import ru.netology.nework.data.paging.PostPagingSource
 import ru.netology.nework.data.remote.api.PostsApi
 import ru.netology.nework.data.remote.dto.CoordsDto
 import ru.netology.nework.data.remote.dto.PostCreateDto
@@ -15,28 +17,19 @@ import ru.netology.nework.domain.repository.PostsRepository
 import ru.netology.nework.error.ApiError
 import ru.netology.nework.error.AppError
 import javax.inject.Inject
-import ru.netology.nework.data.mapper.Post as PostMapper
 
 class PostsRepositoryImpl @Inject constructor(
     private val postsApi: PostsApi,
     private val tokenStorage: TokenStorage
 ) : PostsRepository {
 
-    override fun getPosts(): Flow<PagingData<Post>> = flow {
-        try {
-            val response = postsApi.getPosts()
-
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), "posts_error")
+    override fun getPosts(): Flow<PagingData<Post>> {
+        return Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = false),
+            pagingSourceFactory = {
+                PostPagingSource(postsApi, pageSize = 20)
             }
-
-            val postsDto = response.body() ?: throw ApiError(response.code(), "empty_response")
-            val posts = postsDto.map { PostMapper(it) }
-            emit(PagingData.from(posts))
-
-        } catch (e: Exception) {
-            emit(PagingData.from(emptyList<Post>()))
-        }
+        ).flow
     }
 
     override suspend fun createPost(

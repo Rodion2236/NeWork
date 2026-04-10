@@ -65,7 +65,12 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
         lifecycleScope.launch {
             adapter.loadStateFlow.collect { loadState ->
                 when (loadState.refresh) {
-                    is LoadState.Loading -> binding.swipeRefresh.isRefreshing = true
+                    is LoadState.Loading -> {
+                        binding.swipeRefresh.isRefreshing = true
+                    }
+                    is LoadState.NotLoading -> {
+                        binding.swipeRefresh.isRefreshing = false
+                    }
                     is LoadState.Error -> {
                         binding.swipeRefresh.isRefreshing = false
                         Snackbar.make(
@@ -74,7 +79,6 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
                             Snackbar.LENGTH_SHORT
                         ).show()
                     }
-                    else -> binding.swipeRefresh.isRefreshing = false
                 }
             }
         }

@@ -65,6 +65,7 @@ class EventsFragment : Fragment(R.layout.fragment_event) {
             adapter.loadStateFlow.collect { loadState ->
                 when (loadState.refresh) {
                     is LoadState.Loading -> binding.swipeRefreshEvent.isRefreshing = true
+                    is LoadState.NotLoading -> binding.swipeRefreshEvent.isRefreshing = false
                     is LoadState.Error -> {
                         binding.swipeRefreshEvent.isRefreshing = false
                         Snackbar.make(
@@ -73,7 +74,6 @@ class EventsFragment : Fragment(R.layout.fragment_event) {
                             Snackbar.LENGTH_SHORT
                         ).show()
                     }
-                    else -> binding.swipeRefreshEvent.isRefreshing = false
                 }
             }
         }

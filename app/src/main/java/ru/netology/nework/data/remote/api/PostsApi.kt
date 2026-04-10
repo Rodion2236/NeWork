@@ -10,6 +10,12 @@ interface PostsApi {
     @GET("api/posts")
     suspend fun getPosts(): Response<List<PostDto>>
 
+    @GET("api/posts/latest")
+    suspend fun getPostsLatest(
+        @Query("count") count: Int,
+        @Query("offset") offset: Int = 0
+    ): Response<List<PostDto>>
+
     @GET("api/posts/{id}")
     suspend fun getPost(@Path("id") id: String): Response<PostDto>
 

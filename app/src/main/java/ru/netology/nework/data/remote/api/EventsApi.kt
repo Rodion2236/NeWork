@@ -12,6 +12,12 @@ interface EventsApi {
         @Header("Api-Key") apiKey: String
     ): Response<List<EventDto>>
 
+    @GET("api/events/latest")
+    suspend fun getEventsLatest(
+        @Query("count") count: Int,
+        @Query("offset") offset: Int = 0
+    ): Response<List<EventDto>>
+
     @GET("api/events/{id}")
     suspend fun getEvent(
         @Header("Authorization") token: String,

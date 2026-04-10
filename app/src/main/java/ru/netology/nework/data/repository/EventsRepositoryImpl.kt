@@ -1,11 +1,13 @@
 package ru.netology.nework.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import ru.netology.nework.BuildConfig
 import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.data.mapper.Event
+import ru.netology.nework.data.paging.EventPagingSource
 import ru.netology.nework.data.remote.api.EventsApi
 import ru.netology.nework.data.remote.dto.CoordsDto
 import ru.netology.nework.data.remote.dto.EventCreateDto
@@ -21,26 +23,17 @@ class EventsRepositoryImpl @Inject constructor(
     private val tokenStorage: TokenStorage
 ) : EventsRepository {
 
-    override fun getEvents(): Flow<PagingData<Event>> = flow {
-        try {
-            val token = tokenStorage.getToken() ?: throw IllegalStateException("No auth token")
-
-            val response = eventsApi.getEvents(
-                token = token,
-                apiKey = BuildConfig.NETOLOGY_API_KEY
-            )
-
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), "events_error")
+    override fun getEvents(): Flow<PagingData<Event>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false,
+                initialLoadSize = 40
+            ),
+            pagingSourceFactory = {
+                EventPagingSource(eventsApi, pageSize = 20)
             }
-
-            val eventsDto = response.body() ?: throw ApiError(response.code(), "empty_response")
-            val events = eventsDto.map { Event(it) }
-            emit(PagingData.from(events))
-
-        } catch (e: Exception) {
-            emit(PagingData.from(emptyList<Event>()))
-        }
+        ).flow
     }
 
     override suspend fun getEvent(eventId: String): Result<Event> {

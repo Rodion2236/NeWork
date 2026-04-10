@@ -7,7 +7,7 @@ import ru.netology.nework.domain.model.Post
 import ru.netology.nework.domain.model.User
 
 interface UsersRepository {
-    fun getUsers(): Flow<PagingData<User>>
+    fun getUsers(): Flow<List<User>>
     suspend fun getUser(userId: String): Result<User>
     fun getUserWall(userId: String): Flow<PagingData<Post>>
     suspend fun getUserJobs(userId: String): Result<List<Job>>
