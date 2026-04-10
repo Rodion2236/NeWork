@@ -19,6 +19,7 @@ import ru.netology.nework.R
 import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.databinding.FragmentPostsBinding
 import ru.netology.nework.domain.model.Post
+import ru.netology.nework.fragments.main.MainFragment
 import ru.netology.nework.presentation.feed.FeedUiState
 import ru.netology.nework.presentation.feed.FeedViewModel
 import ru.netology.nework.presentation.feed.adapter.PostAdapter
@@ -165,8 +166,12 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
     }
 
     private fun openPostDetail(post: Post) {
+        val mainFragment = parentFragment as? MainFragment
+        val sourceTab = mainFragment?.getCurrentTabIndex() ?: 0
+
         val bundle = Bundle().apply {
             putString(BundleKeys.POST_ID, post.id)
+            putInt("sourceTab", sourceTab)
         }
         findNavController().navigate(R.id.action_global_to_detailPostFragment, bundle)
     }

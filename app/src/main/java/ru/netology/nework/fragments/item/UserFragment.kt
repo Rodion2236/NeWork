@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentUserBinding
 import ru.netology.nework.domain.model.User
+import ru.netology.nework.fragments.main.MainFragment
 import ru.netology.nework.presentation.users.UsersViewModel
 import ru.netology.nework.presentation.users.adapter.UserAdapter
 import ru.netology.nework.util.BundleKeys
@@ -72,8 +73,12 @@ class UserFragment : Fragment(R.layout.fragment_user) {
     }
 
     private fun openUserDetail(user: User) {
+        val mainFragment = parentFragment as? MainFragment
+        val sourceTab = mainFragment?.getCurrentTabIndex() ?: 0
+
         val bundle = Bundle().apply {
             putString(BundleKeys.USER_ID, user.id)
+            putInt("sourceTab", sourceTab)
         }
         findNavController().navigate(R.id.action_global_to_detailUserFragment, bundle)
     }

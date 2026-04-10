@@ -86,24 +86,17 @@
         tools:layout="@layout/fragment_jobs" />
     <action
         android:id="@+id/action_global_to_detailPostFragment"
-        app:destination="@id/detailPostFragment"
-        app:popUpTo="@id/mainFragment"
-        app:popUpToInclusive="false" />
+        app:destination="@id/detailPostFragment" />
 
     <action
         android:id="@+id/action_global_to_detailEventFragment"
-        app:destination="@id/detailEventFragment"
-        app:popUpTo="@id/mainFragment"
-        app:popUpToInclusive="false" />
+        app:destination="@id/detailEventFragment" />
 
     <action
         android:id="@+id/action_global_to_detailUserFragment"
-        app:destination="@id/detailUserFragment"
-        app:popUpTo="@id/mainFragment"
-        app:popUpToInclusive="false" />
+        app:destination="@id/detailUserFragment" />
+
     <action
         android:id="@+id/action_global_to_mapsFragment"
-        app:destination="@id/mapsFragment"
-        app:popUpTo="@id/mainFragment"
-        app:popUpToInclusive="false" />
+        app:destination="@id/mapsFragment" />
 </navigation>

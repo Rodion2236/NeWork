@@ -1,7 +1,6 @@
 package ru.netology.nework.fragments.main
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -29,6 +28,23 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         _binding = FragmentMainBinding.bind(view)
 
         setupToolbar()
+
+        val navController = findNavController()
+        val currentBackStackEntry = navController.getBackStackEntry(R.id.mainFragment)
+
+        currentBackStackEntry.savedStateHandle.getLiveData<Int>("restoreTab")
+            .observe(viewLifecycleOwner) { tabPosition ->
+                tabPosition?.let { position ->
+                    val itemId = when (position) {
+                        0 -> R.id.postsFragment
+                        1 -> R.id.eventsFragment
+                        2 -> R.id.usersFragment
+                        else -> R.id.postsFragment
+                    }
+                    binding.bottomNavigation.selectedItemId = itemId
+                    currentBackStackEntry.savedStateHandle.remove<Int>("restoreTab")
+                }
+            }
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -66,12 +82,29 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
+    fun getCurrentTabIndex(): Int {
+        return when (binding.bottomNavigation.selectedItemId) {
+            R.id.postsFragment -> 0
+            R.id.eventsFragment -> 1
+            R.id.usersFragment -> 2
+            else -> 0
+        }
+    }
+
     private fun navigateToMyProfile() {
-        val currentUserId = tokenStorage.getUserId()
-        Log.d("MainFragment", "Navigating to profile with userId: $currentUserId")
+        val currentUserId = tokenStorage.getUserId() ?: return
+
+        val currentTabId = binding.bottomNavigation.selectedItemId
+        val sourceTab = when (currentTabId) {
+            R.id.postsFragment -> 0
+            R.id.eventsFragment -> 1
+            R.id.usersFragment -> 2
+            else -> 0
+        }
 
         val bundle = Bundle().apply {
             putString(BundleKeys.USER_ID, currentUserId)
+            putInt("sourceTab", sourceTab)
         }
         findNavController().navigate(
             R.id.action_global_to_detailUserFragment,

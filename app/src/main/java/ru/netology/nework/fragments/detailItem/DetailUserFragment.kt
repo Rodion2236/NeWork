@@ -96,7 +96,13 @@ class DetailUserFragment : Fragment(R.layout.fragment_detail_user) {
 
     private fun setupToolbar() {
         binding.topAppBar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+            val sourceTab = arguments?.getInt("sourceTab")
+
+            val navController = findNavController()
+            val backStackEntry = navController.getBackStackEntry(R.id.mainFragment)
+            backStackEntry.savedStateHandle.set("restoreTab", sourceTab)
+
+            navController.navigateUp()
         }
     }
 

@@ -19,6 +19,8 @@ import ru.netology.nework.R
 import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.databinding.FragmentEventBinding
 import ru.netology.nework.domain.model.Event
+import ru.netology.nework.domain.model.Post
+import ru.netology.nework.fragments.main.MainFragment
 import ru.netology.nework.presentation.events.EventsUiState
 import ru.netology.nework.presentation.events.EventsViewModel
 import ru.netology.nework.presentation.events.adapter.EventAdapter
@@ -160,8 +162,12 @@ class EventsFragment : Fragment(R.layout.fragment_event) {
     }
 
     private fun openEventDetail(event: Event) {
+        val mainFragment = parentFragment as? MainFragment
+        val sourceTab = mainFragment?.getCurrentTabIndex() ?: 0
+
         val bundle = Bundle().apply {
             putString(BundleKeys.EVENT_ID, event.id)
+            putInt("sourceTab", sourceTab)
         }
         findNavController().navigate(R.id.action_global_to_detailEventFragment, bundle)
     }
