@@ -58,7 +58,7 @@ class NewPostViewModel @Inject constructor(
         mentionIds = ids
     }
 
-    fun createPost(content: String) {
+    fun createPost(content: String, userId: String? = null) {
         viewModelScope.launch {
             _uiState.value = NewPostUiState.Loading
             postsRepository.createPost(
@@ -66,7 +66,8 @@ class NewPostViewModel @Inject constructor(
                 imageUri = selectedImage,
                 fileUri = selectedFile,
                 coords = locationCoords,
-                mentionIds = mentionIds
+                mentionIds = mentionIds,
+                userId = userId
             )
                 .onSuccess { _uiState.value = NewPostUiState.Success }
                 .onFailure { _uiState.value = NewPostUiState.Error(it.message ?: "Unknown error") }

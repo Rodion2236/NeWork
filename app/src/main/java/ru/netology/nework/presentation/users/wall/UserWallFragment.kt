@@ -14,12 +14,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.netology.nework.R
 import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.databinding.FragmentPostsBinding
 import ru.netology.nework.domain.model.Post
 import ru.netology.nework.presentation.feed.adapter.PostAdapter
+import ru.netology.nework.util.BundleKeys
 import ru.netology.nework.util.VideoPlayerManager
 import javax.inject.Inject
 
@@ -63,27 +65,54 @@ class UserWallFragment : Fragment(R.layout.fragment_posts) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentPostsBinding.bind(view)
 
+        val userId = arguments?.getString(ARG_USER_ID) ?: ""
+        val currentUserId = tokenStorage.getUserId() ?: ""
+        val isOwnProfile = userId == currentUserId
+
         setupRecyclerView()
         setupObservers()
+        setupFab(isOwnProfile, userId)
     }
 
     private fun setupRecyclerView() {
         binding.recyclerViewPost.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewPost.adapter = adapter
 
-        lifecycleScope.launch {
-            adapter.loadStateFlow.collect { loadState ->
-                when (loadState.refresh) {
-                    is LoadState.Loading -> binding.swipeRefresh.isRefreshing = true
-                    is LoadState.Error -> {
-                        binding.swipeRefresh.isRefreshing = false
-                        Snackbar.make(
-                            binding.root,
-                            R.string.connection_error,
-                            Snackbar.LENGTH_SHORT
-                        ).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adapter.loadStateFlow.collect { loadState ->
+                    when (loadState.refresh) {
+                        is LoadState.Loading -> {
+                            if (!binding.swipeRefresh.isRefreshing) {
+                                binding.swipeRefresh.isRefreshing = true
+                            }
+                        }
+                        is LoadState.NotLoading, is LoadState.Error -> {
+                            if (binding.swipeRefresh.isRefreshing) {
+                                binding.swipeRefresh.isRefreshing = false
+                            }
+                            if (loadState.refresh is LoadState.Error) {
+                                Snackbar.make(
+                                    binding.root,
+                                    R.string.connection_error,
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
                     }
-                    else -> binding.swipeRefresh.isRefreshing = false
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            binding.swipeRefresh.setOnRefreshListener {
+                viewModel.refresh()
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    delay(100)
+                    if (_binding != null && binding.swipeRefresh.isRefreshing) {
+                        binding.swipeRefresh.isRefreshing = false
+                    }
                 }
             }
         }
@@ -96,6 +125,16 @@ class UserWallFragment : Fragment(R.layout.fragment_posts) {
                     adapter.submitData(pagingData)
                 }
             }
+        }
+    }
+
+    private fun setupFab(isOwnProfile: Boolean, userId: String) {
+        binding.buttonNewPost.visibility = if (isOwnProfile) View.VISIBLE else View.GONE
+        binding.buttonNewPost.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString(BundleKeys.USER_ID, userId)
+            }
+            findNavController().navigate(R.id.newPostFragment, bundle)
         }
     }
 
@@ -117,7 +156,13 @@ class UserWallFragment : Fragment(R.layout.fragment_posts) {
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.edit -> {
-                        // TODO: Навигация на редактирование
+                        val bundle = Bundle().apply {
+                            putString(BundleKeys.POST_ID, post.id)
+                            putBoolean("isEditMode", true)
+                            putString("originalContent", post.content)
+                        }
+                        findNavController().navigate(R.id.newPostFragment, bundle)
+                        true
                     }
                     R.id.delete -> {
                         MaterialAlertDialogBuilder(requireContext())
@@ -128,9 +173,10 @@ class UserWallFragment : Fragment(R.layout.fragment_posts) {
                             }
                             .setNegativeButton(R.string.cancel, null)
                             .show()
+                        true
                     }
+                    else -> false
                 }
-                true
             }
             show()
         }

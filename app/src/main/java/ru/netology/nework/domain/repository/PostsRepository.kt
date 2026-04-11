@@ -12,7 +12,8 @@ interface PostsRepository {
         imageUri: Uri?,
         fileUri: Uri?,
         coords: Pair<Double, Double>?,
-        mentionIds: List<String>
+        mentionIds: List<String>,
+        userId: String? = null
     ): Result<Unit>
 
     suspend fun likePost(postId: String, liked: Boolean): Result<Unit>

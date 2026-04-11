@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -52,7 +53,11 @@ class JobsFragment : Fragment(R.layout.fragment_jobs) {
 
     private fun setupClicks() {
         binding.buttonNewJob.setOnClickListener {
-            findNavController().navigate(R.id.newJobFragment)
+            val userId = arguments?.getString(BundleKeys.USER_ID)
+            val bundle = Bundle().apply {
+                putString(BundleKeys.USER_ID, userId)
+            }
+            findNavController().navigate(R.id.newJobFragment, bundle)
         }
     }
 
@@ -138,8 +143,24 @@ class JobsFragment : Fragment(R.layout.fragment_jobs) {
             linkView.text = job.link
             linkView.visibility = View.VISIBLE
             linkView.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW, job.link.toUri())
-                startActivity(intent)
+                val url = job.link?.trim()
+                if (!url.isNullOrBlank()) {
+                    try {
+                        if (url.startsWith("http://") || url.startsWith("https://")) {
+                            val uri = url.toUri()
+                            val intent = Intent(Intent.ACTION_VIEW, uri)
+                            if (intent.resolveActivity(requireContext().packageManager) != null) {
+                                startActivity(intent)
+                            } else {
+                                Snackbar.make(cardView, getString(R.string.no_app_to_open), Snackbar.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Snackbar.make(cardView, getString(R.string.invalid_link), Snackbar.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Snackbar.make(cardView, getString(R.string.failed_to_open_link), Snackbar.LENGTH_SHORT).show()
+                    }
+                }
             }
         } else {
             linkView.visibility = View.GONE
@@ -149,10 +170,13 @@ class JobsFragment : Fragment(R.layout.fragment_jobs) {
         if (viewModel.isOwnProfile) {
             deleteBtn.visibility = View.VISIBLE
             deleteBtn.setOnClickListener {
-                Snackbar.make(cardView, "Удалить работу?", Snackbar.LENGTH_SHORT)
-                    .setAction("Да") {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.delete)
+                    .setMessage(R.string.confirm_delete_job)
+                    .setPositiveButton(R.string.ok) { _, _ ->
                         job.id.toIntOrNull()?.let { viewModel.deleteJob(it) }
                     }
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         } else {

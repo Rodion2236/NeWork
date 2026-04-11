@@ -10,7 +10,8 @@ interface JobsRepository {
         position: String?,
         start: Long,
         finish: Long?,
-        link: String?
+        link: String?,
+        userId: String? = null
     ): Result<Unit>
     suspend fun deleteJob(jobId: Int): Result<Unit>
 }

@@ -17,6 +17,7 @@ import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentNewJobBinding
 import ru.netology.nework.presentation.newjob.NewJobViewModel
 import ru.netology.nework.presentation.newjobs.NewJobUiState
+import ru.netology.nework.util.BundleKeys
 
 @AndroidEntryPoint
 class NewJobFragment : Fragment(R.layout.fragment_new_job) {
@@ -33,12 +34,14 @@ class NewJobFragment : Fragment(R.layout.fragment_new_job) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentNewJobBinding.bind(view)
 
-        setupClicks()
+        val userId = arguments?.getString(BundleKeys.USER_ID)
+
+        setupClicks(userId)
         setupObservers()
         setupToolbar()
     }
 
-    private fun setupClicks() {
+    private fun setupClicks(userId: String?) {
         binding.startWork.setOnClickListener {
             val datePicker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText(getString(R.string.select_start_date))
@@ -51,14 +54,28 @@ class NewJobFragment : Fragment(R.layout.fragment_new_job) {
         }
 
         binding.finishWork.setOnClickListener {
+            if (binding.checkboxCurrentJob.isChecked) return@setOnClickListener
+
             val datePicker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText(getString(R.string.select_dates))
                 .build()
             datePicker.addOnPositiveButtonClickListener { timestamp ->
                 endDate = timestamp
                 binding.finishWork.text = formatTimestamp(timestamp)
+                binding.checkboxCurrentJob.isChecked = false
             }
             datePicker.show(parentFragmentManager, "END_DATE_PICKER")
+        }
+
+        binding.checkboxCurrentJob.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                binding.finishWork.isEnabled = false
+                binding.finishWork.text = getString(R.string.present)
+                endDate = null
+            } else {
+                binding.finishWork.isEnabled = true
+                binding.finishWork.text = getString(R.string.date_finish)
+            }
         }
 
         binding.buttonJobCreate.setOnClickListener {
@@ -70,13 +87,12 @@ class NewJobFragment : Fragment(R.layout.fragment_new_job) {
                 binding.nameLayout.error = getString(R.string.empty_field)
                 return@setOnClickListener
             }
-
             if (startDate == null) {
                 Toast.makeText(requireContext(), "Выберите дату начала", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            viewModel.createJob(name, position, startDate!!, endDate, link)
+            viewModel.createJob(name, position, startDate!!, endDate, link, userId)
         }
     }
 

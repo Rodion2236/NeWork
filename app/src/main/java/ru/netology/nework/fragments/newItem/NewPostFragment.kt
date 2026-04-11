@@ -48,11 +48,11 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
 
         val isEditMode = arguments?.getBoolean("isEditMode") ?: false
         val postId = arguments?.getString(BundleKeys.POST_ID)
+        val userId = arguments?.getString(BundleKeys.USER_ID)
 
         if (isEditMode && postId != null) {
             viewModel.initEditMode(postId)
             binding.topAppBar.title = getString(R.string.edit_post)
-
             arguments?.getString("originalContent")?.let { content ->
                 binding.textPost.setText(content)
                 binding.textPost.setSelection(content.length)
@@ -65,35 +65,22 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
             viewModel.onLocationSelected(lat, long)
         }
 
-        setupClicks(isEditMode)
+        setupClicks(isEditMode, userId)
         setupObservers()
         setupToolbar()
     }
 
-    private fun setupClicks(isEditMode: Boolean) {
-        binding.addPhoto.setOnClickListener {
-            imagePicker.launch("image/*")
-        }
-
-        binding.addFile.setOnClickListener {
-            filePicker.launch("*/*")
-        }
-
+    private fun setupClicks(isEditMode: Boolean, userId: String?) {
+        binding.addPhoto.setOnClickListener { imagePicker.launch("image/*") }
+        binding.addFile.setOnClickListener { filePicker.launch("*/*") }
         binding.addUsers.setOnClickListener {
             Toast.makeText(requireContext(), "Выбор пользователей", Toast.LENGTH_SHORT).show()
         }
-
         binding.addLocation.setOnClickListener {
             findNavController().navigate(R.id.action_global_to_mapsFragment)
         }
-
-        binding.removeImageAttachment.setOnClickListener {
-            viewModel.onImageRemoved()
-        }
-
-        binding.removeLocation.setOnClickListener {
-            viewModel.onLocationRemoved()
-        }
+        binding.removeImageAttachment.setOnClickListener { viewModel.onImageRemoved() }
+        binding.removeLocation.setOnClickListener { viewModel.onLocationRemoved() }
 
         binding.topAppBar.menu.findItem(R.id.save)?.setOnMenuItemClickListener {
             val content = binding.textPost.text?.toString()?.trim()
@@ -104,7 +91,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
             if (isEditMode) {
                 viewModel.updatePost(content)
             } else {
-                viewModel.createPost(content)
+                viewModel.createPost(content, userId)
             }
             true
         }

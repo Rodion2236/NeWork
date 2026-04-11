@@ -102,4 +102,9 @@
     <string name="post_created">Пост создан</string>
     <string name="post_updated">Пост обновлён</string>
     <string name="event_updated">Событие обновлено</string>
+    <string name="confirm_delete_job">Вы действительно хотите удалить эту запись?</string>
+    <string name="invalid_link">Некорректная ссылка</string>
+    <string name="no_app_to_open">Нет приложения для открытия ссылки</string>
+    <string name="failed_to_open_link">Не удалось открыть ссылку</string>
+    <string name="current_job">Работаю здесь сейчас</string>
 </resources>

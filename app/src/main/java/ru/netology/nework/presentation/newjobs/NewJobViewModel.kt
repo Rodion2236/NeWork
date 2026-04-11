@@ -19,22 +19,19 @@ class NewJobViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<NewJobUiState>(NewJobUiState.Ready)
     val uiState: StateFlow<NewJobUiState> = _uiState.asStateFlow()
 
-    fun createJob(
-        name: String,
-        position: String?,
-        start: Long,
-        finish: Long?,
-        link: String?
-    ) {
+    fun createJob(name: String, position: String?, start: Long, finish: Long?, link: String?, userId: String? = null) {
         viewModelScope.launch {
             _uiState.value = NewJobUiState.Loading
-            jobsRepository.createJob(name, position, start, finish, link)
-                .onSuccess {
-                    _uiState.value = NewJobUiState.Success
-                }
-                .onFailure { error ->
-                    _uiState.value = NewJobUiState.Error(error.message ?: "Unknown error")
-                }
+            jobsRepository.createJob(
+                name = name,
+                position = position,
+                start = start,
+                finish = finish,
+                link = link,
+                userId = userId
+            )
+                .onSuccess { _uiState.value = NewJobUiState.Success }
+                .onFailure { _uiState.value = NewJobUiState.Error(it.message ?: "Unknown error") }
         }
     }
 }

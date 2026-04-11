@@ -72,7 +72,8 @@ class JobsRepositoryImpl @Inject constructor(
         position: String?,
         start: Long,
         finish: Long?,
-        link: String?
+        link: String?,
+        userId: String?
     ): Result<Unit> {
         return try {
             val token = tokenStorage.getToken() ?: throw IllegalStateException("No auth token")

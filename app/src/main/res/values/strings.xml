@@ -103,4 +103,9 @@
     <string name="post_created">Post created</string>
     <string name="post_updated">Post updated</string>
     <string name="event_updated">Event updated</string>
+    <string name="confirm_delete_job">Are you sure you want to delete this job?</string>
+    <string name="invalid_link">Invalid link</string>
+    <string name="no_app_to_open">No app found to open this link</string>
+    <string name="failed_to_open_link">Failed to open link</string>
+    <string name="current_job">Currently working here</string>
 </resources>

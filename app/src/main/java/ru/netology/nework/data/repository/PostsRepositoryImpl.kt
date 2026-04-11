@@ -37,7 +37,8 @@ class PostsRepositoryImpl @Inject constructor(
         imageUri: Uri?,
         fileUri: Uri?,
         coords: Pair<Double, Double>?,
-        mentionIds: List<String>
+        mentionIds: List<String>,
+        userId: String?
     ): Result<Unit> {
         return try {
             val token = tokenStorage.getToken() ?: throw IllegalStateException("No auth token")
