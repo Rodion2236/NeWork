@@ -1,6 +1,7 @@
 package ru.netology.nework.presentation.users.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -46,6 +47,8 @@ class UserViewHolder(
             error = R.drawable.ic_account_circle_24,
             roundedCorners = 24
         )
+
+        binding.checkBox.visibility = View.GONE
 
         binding.root.setOnClickListener { onUserClick(user) }
     }
