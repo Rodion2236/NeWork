@@ -9,11 +9,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.netology.nework.R
+import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.databinding.FragmentDetailUserBinding
 import ru.netology.nework.fragments.item.JobsFragment
 import ru.netology.nework.presentation.users.DetailUserUiState
@@ -21,9 +23,13 @@ import ru.netology.nework.presentation.users.DetailUserViewModel
 import ru.netology.nework.presentation.users.wall.UserWallFragment
 import ru.netology.nework.util.BundleKeys
 import ru.netology.nework.util.load
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DetailUserFragment : Fragment(R.layout.fragment_detail_user) {
+
+    @Inject
+    lateinit var tokenStorage: TokenStorage
 
     private val viewModel: DetailUserViewModel by viewModels()
 
@@ -95,6 +101,26 @@ class DetailUserFragment : Fragment(R.layout.fragment_detail_user) {
     }
 
     private fun setupToolbar() {
+        val currentUserId = tokenStorage.getUserId()
+        val isMyProfile = viewModel.userId == currentUserId
+
+        if (isMyProfile) {
+            binding.topAppBar.menu.clear()
+            binding.topAppBar.inflateMenu(R.menu.user_menu)
+
+            binding.topAppBar.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.exit -> {
+                        showLogoutConfirmation()
+                        true
+                    }
+                    else -> false
+                }
+            }
+        } else {
+            binding.topAppBar.menu.clear()
+        }
+
         binding.topAppBar.setNavigationOnClickListener {
             val sourceTab = arguments?.getInt("sourceTab")
 
@@ -103,6 +129,25 @@ class DetailUserFragment : Fragment(R.layout.fragment_detail_user) {
             backStackEntry.savedStateHandle.set("restoreTab", sourceTab)
 
             navController.navigateUp()
+        }
+    }
+
+    private fun showLogoutConfirmation() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.confirm_logout)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                performLogout()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun performLogout() {
+        tokenStorage.clear()
+
+        findNavController().apply {
+            popBackStack(R.id.mainFragment, false)
+            navigate(R.id.action_global_to_loginFragment)
         }
     }
 

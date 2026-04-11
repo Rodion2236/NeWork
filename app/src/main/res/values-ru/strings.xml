@@ -95,4 +95,6 @@
     <string name="password_too_short">Пароль должен содержать минимум 6 символов</string>
     <string name="select_event_type_and_date">Выбрать тип и дату</string>
     <string name="date_error">Ошибка даты</string>
+    <string name="logout">Выйти</string>
+    <string name="confirm_logout">Вы действительно хотите выйти?</string>
 </resources>
