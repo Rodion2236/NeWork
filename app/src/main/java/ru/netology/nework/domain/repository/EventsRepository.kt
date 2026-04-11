@@ -19,8 +19,6 @@ interface EventsRepository {
         speakerIds: List<String>
     ): Result<Unit>
 
-    suspend fun updateEvent(eventId: String, event: Event): Result<Event>
-
     suspend fun deleteEvent(eventId: String): Result<Unit>
 
     suspend fun likeEvent(eventId: String, liked: Boolean): Result<Unit>

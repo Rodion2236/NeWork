@@ -63,12 +63,32 @@
         android:id="@+id/newPostFragment"
         android:name="ru.netology.nework.fragments.newItem.NewPostFragment"
         android:label="fragment_new_post"
-        tools:layout="@layout/fragment_new_post" />
+        tools:layout="@layout/fragment_new_post" >
+        <argument
+            android:name="postId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="isEditMode"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
     <fragment
         android:id="@+id/newEventFragment"
         android:name="ru.netology.nework.fragments.newItem.NewEventFragment"
         android:label="fragment_new_event"
-        tools:layout="@layout/fragment_new_event" />
+        tools:layout="@layout/fragment_new_event" >
+        <argument
+            android:name="eventId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="isEditMode"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
     <fragment
         android:id="@+id/newJobFragment"
         android:name="ru.netology.nework.fragments.newItem.NewJobFragment"

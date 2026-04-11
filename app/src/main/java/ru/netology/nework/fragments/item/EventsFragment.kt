@@ -142,7 +142,13 @@ class EventsFragment : Fragment(R.layout.fragment_event) {
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.edit -> {
-                        // TODO: Навигация на редактирование
+                        val bundle = Bundle().apply {
+                            putString(BundleKeys.EVENT_ID, event.id)
+                            putBoolean("isEditMode", true)
+                            putString("originalContent", event.content)
+                        }
+                        findNavController().navigate(R.id.newEventFragment, bundle)
+                        true
                     }
                     R.id.delete -> {
                         MaterialAlertDialogBuilder(requireContext())

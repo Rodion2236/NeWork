@@ -146,7 +146,13 @@ class PostsFragment : Fragment(R.layout.fragment_posts) {
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.edit -> {
-                        // TODO: Навигация на редактирование
+                        val bundle = Bundle().apply {
+                            putString(BundleKeys.POST_ID, post.id)
+                            putBoolean("isEditMode", true)
+                            putString("originalContent", post.content)
+                        }
+                        findNavController().navigate(R.id.newPostFragment, bundle)
+                        true
                     }
                     R.id.delete -> {
                         MaterialAlertDialogBuilder(requireContext())

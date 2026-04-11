@@ -46,18 +46,31 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentNewPostBinding.bind(view)
 
+        val isEditMode = arguments?.getBoolean("isEditMode") ?: false
+        val postId = arguments?.getString(BundleKeys.POST_ID)
+
+        if (isEditMode && postId != null) {
+            viewModel.initEditMode(postId)
+            binding.topAppBar.title = getString(R.string.edit_post)
+
+            arguments?.getString("originalContent")?.let { content ->
+                binding.textPost.setText(content)
+                binding.textPost.setSelection(content.length)
+            }
+        }
+
         setFragmentResultListener(BundleKeys.MAPS_RESULT) { _, bundle ->
             val lat = bundle.getDouble(BundleKeys.LAT)
             val long = bundle.getDouble(BundleKeys.LNG)
             viewModel.onLocationSelected(lat, long)
         }
 
-        setupClicks()
+        setupClicks(isEditMode)
         setupObservers()
         setupToolbar()
     }
 
-    private fun setupClicks() {
+    private fun setupClicks(isEditMode: Boolean) {
         binding.addPhoto.setOnClickListener {
             imagePicker.launch("image/*")
         }
@@ -67,7 +80,6 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         }
 
         binding.addUsers.setOnClickListener {
-            // TODO: Открыть диалог выбора пользователей
             Toast.makeText(requireContext(), "Выбор пользователей", Toast.LENGTH_SHORT).show()
         }
 
@@ -89,7 +101,11 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                 binding.textPost.error = getString(R.string.empty_field)
                 return@setOnMenuItemClickListener true
             }
-            viewModel.createPost(content)
+            if (isEditMode) {
+                viewModel.updatePost(content)
+            } else {
+                viewModel.createPost(content)
+            }
             true
         }
     }
@@ -102,7 +118,14 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                         is NewPostUiState.Loading -> {}
                         is NewPostUiState.Ready -> {}
                         is NewPostUiState.Success -> {
-                            Toast.makeText(requireContext(), "Пост создан", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                if (arguments?.getBoolean("isEditMode") == true)
+                                    getString(R.string.post_updated)
+                                else
+                                    getString(R.string.post_created),
+                                Toast.LENGTH_SHORT
+                            ).show()
                             findNavController().navigateUp()
                         }
                         is NewPostUiState.Error -> {

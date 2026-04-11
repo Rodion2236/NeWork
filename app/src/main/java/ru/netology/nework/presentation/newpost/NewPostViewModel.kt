@@ -24,6 +24,12 @@ class NewPostViewModel @Inject constructor(
     private var locationCoords: Pair<Double, Double>? = null
     private var mentionIds: List<String> = emptyList()
 
+    private var editPostId: String? = null
+
+    fun initEditMode(postId: String) {
+        editPostId = postId
+    }
+
     fun onImageSelected(uri: Uri) {
         selectedImage = uri
         _uiState.value = NewPostUiState.ImageSelected(uri)
@@ -55,7 +61,6 @@ class NewPostViewModel @Inject constructor(
     fun createPost(content: String) {
         viewModelScope.launch {
             _uiState.value = NewPostUiState.Loading
-
             postsRepository.createPost(
                 content = content,
                 imageUri = selectedImage,
@@ -63,12 +68,28 @@ class NewPostViewModel @Inject constructor(
                 coords = locationCoords,
                 mentionIds = mentionIds
             )
+                .onSuccess { _uiState.value = NewPostUiState.Success }
+                .onFailure { _uiState.value = NewPostUiState.Error(it.message ?: "Unknown error") }
+        }
+    }
+
+    fun updatePost(content: String) {
+        val postId = editPostId ?: return
+        viewModelScope.launch {
+            _uiState.value = NewPostUiState.Loading
+            postsRepository.deletePost(postId)
                 .onSuccess {
-                    _uiState.value = NewPostUiState.Success
+                    postsRepository.createPost(
+                        content = content,
+                        imageUri = selectedImage,
+                        fileUri = selectedFile,
+                        coords = locationCoords,
+                        mentionIds = mentionIds
+                    )
+                        .onSuccess { _uiState.value = NewPostUiState.Success }
+                        .onFailure { _uiState.value = NewPostUiState.Error(it.message ?: "Unknown error") }
                 }
-                .onFailure {
-                    _uiState.value = NewPostUiState.Error(it.message ?: "Unknown error")
-                }
+                .onFailure { _uiState.value = NewPostUiState.Error(it.message ?: "Unknown error") }
         }
     }
 }

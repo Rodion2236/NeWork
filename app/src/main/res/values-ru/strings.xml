@@ -97,4 +97,9 @@
     <string name="date_error">Ошибка даты</string>
     <string name="logout">Выйти</string>
     <string name="confirm_logout">Вы действительно хотите выйти?</string>
+    <string name="edit_post">Редактировать пост</string>
+    <string name="edit_event">Редактировать событие</string>
+    <string name="post_created">Пост создан</string>
+    <string name="post_updated">Пост обновлён</string>
+    <string name="event_updated">Событие обновлено</string>
 </resources>

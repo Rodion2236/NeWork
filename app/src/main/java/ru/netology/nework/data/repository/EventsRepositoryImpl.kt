@@ -174,8 +174,4 @@ class EventsRepositoryImpl @Inject constructor(
             Result.failure(AppError.from(e))
         }
     }
-
-    override suspend fun updateEvent(eventId: String, event: Event): Result<Event> {
-        return Result.failure(UnsupportedOperationException("updateEvent not implemented"))
-    }
 }

@@ -35,6 +35,19 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentNewEventBinding.bind(view)
 
+        val isEditMode = arguments?.getBoolean("isEditMode") ?: false
+        val eventId = arguments?.getString(BundleKeys.EVENT_ID)
+
+        if (isEditMode && eventId != null) {
+            viewModel.initEditMode(eventId)
+            binding.topAppBar.title = getString(R.string.edit_event)
+
+            arguments?.getString("originalContent")?.let { content ->
+                binding.textEvent.setText(content)
+                binding.textEvent.setSelection(content.length)
+            }
+        }
+
         setFragmentResultListener(BundleKeys.MAPS_RESULT) { _, bundle ->
             val lat = bundle.getDouble(BundleKeys.LAT)
             val long = bundle.getDouble(BundleKeys.LNG)
@@ -56,12 +69,12 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
             }
         }
 
-        setupClicks()
+        setupClicks(isEditMode)
         setupObservers()
         setupToolbar()
     }
 
-    private fun setupClicks() {
+    private fun setupClicks(isEditMode: Boolean) {
         binding.buttonSetDate.setOnClickListener {
             BottomSheetDialogFragment().show(parentFragmentManager, BottomSheetDialogFragment.TAG)
         }
@@ -96,7 +109,11 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
                 binding.textEvent.error = getString(R.string.empty_field)
                 return@setOnMenuItemClickListener true
             }
-            viewModel.createEvent(content)
+            if (isEditMode) {
+                viewModel.updateEvent(content)
+            } else {
+                viewModel.createEvent(content)
+            }
             true
         }
     }
@@ -109,7 +126,14 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
                         is NewEventUiState.Loading -> {}
                         is NewEventUiState.Ready -> {}
                         is NewEventUiState.Success -> {
-                            Toast.makeText(requireContext(), "Событие создано", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                if (arguments?.getBoolean("isEditMode") == true)
+                                    getString(R.string.event_updated)
+                                else
+                                    getString(R.string.event_created),
+                                Toast.LENGTH_SHORT
+                            ).show()
                             findNavController().navigateUp()
                         }
                         is NewEventUiState.Error -> {

@@ -71,17 +71,5 @@ class EventsViewModel @Inject constructor(
         }
     }
 
-    fun updateEvent(eventId: String, event: Event) {
-        viewModelScope.launch {
-            eventsRepository.updateEvent(eventId, event)
-                .onSuccess {
-                    _uiState.value = EventsUiState.Success("event_updated")
-                }
-                .onFailure { error ->
-                    _uiState.value = EventsUiState.Error("update_failed")
-                }
-        }
-    }
-
     fun refresh() {}
 }

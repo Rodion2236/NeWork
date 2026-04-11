@@ -1,6 +1,5 @@
 package ru.netology.nework.presentation.newevent
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +23,12 @@ class NewEventViewModel @Inject constructor(
     private var selectedDate: Long? = null
     private var locationCoords: Pair<Double, Double>? = null
     private var speakerIds: List<String> = emptyList()
+
+    private var editEventId: String? = null
+
+    fun initEditMode(eventId: String) {
+        editEventId = eventId
+    }
 
     fun onTypeSelected(type: EventType) {
         selectedType = type
@@ -52,9 +57,6 @@ class NewEventViewModel @Inject constructor(
     fun createEvent(content: String) {
         viewModelScope.launch {
             _uiState.value = NewEventUiState.Loading
-
-            Log.d("NewEvent", "Creating event: content=$content, type=$selectedType, datetime=$selectedDate")
-
             eventsRepository.createEvent(
                 content = content,
                 type = selectedType,
@@ -62,14 +64,28 @@ class NewEventViewModel @Inject constructor(
                 coords = locationCoords,
                 speakerIds = speakerIds
             )
+                .onSuccess { _uiState.value = NewEventUiState.Success }
+                .onFailure { _uiState.value = NewEventUiState.Error(it.message ?: "Unknown error") }
+        }
+    }
+
+    fun updateEvent(content: String) {
+        val eventId = editEventId ?: return
+        viewModelScope.launch {
+            _uiState.value = NewEventUiState.Loading
+            eventsRepository.deleteEvent(eventId)
                 .onSuccess {
-                    Log.d("NewEvent", "Event created successfully!")
-                    _uiState.value = NewEventUiState.Success
+                    eventsRepository.createEvent(
+                        content = content,
+                        type = selectedType,
+                        datetime = selectedDate,
+                        coords = locationCoords,
+                        speakerIds = speakerIds
+                    )
+                        .onSuccess { _uiState.value = NewEventUiState.Success }
+                        .onFailure { _uiState.value = NewEventUiState.Error(it.message ?: "Unknown error") }
                 }
-                .onFailure { error ->
-                    Log.e("NewEvent", "Event creation failed: ${error.message}")
-                    _uiState.value = NewEventUiState.Error(error.message ?: "Unknown error")
-                }
+                .onFailure { _uiState.value = NewEventUiState.Error(it.message ?: "Unknown error") }
         }
     }
 }

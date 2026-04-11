@@ -98,4 +98,9 @@
     <string name="date_error">Invalid date</string>
     <string name="logout">Logout</string>
     <string name="confirm_logout">Are you sure you want to logout?</string>
+    <string name="edit_post">Edit Post</string>
+    <string name="edit_event">Edit Event</string>
+    <string name="post_created">Post created</string>
+    <string name="post_updated">Post updated</string>
+    <string name="event_updated">Event updated</string>
 </resources>
