@@ -16,16 +16,22 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.netology.nework.R
+import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.databinding.FragmentNewPostBinding
+import ru.netology.nework.fragments.dialog.UserSelectionDialogFragment
 import ru.netology.nework.presentation.newpost.NewPostUiState
 import ru.netology.nework.presentation.newpost.NewPostViewModel
 import ru.netology.nework.util.BundleKeys
 import ru.netology.nework.util.load
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class NewPostFragment : Fragment(R.layout.fragment_new_post) {
 
     private val viewModel: NewPostViewModel by viewModels()
+
+    @Inject
+    lateinit var tokenStorage: TokenStorage
 
     private var _binding: FragmentNewPostBinding? = null
     private val binding get() = _binding!!
@@ -39,7 +45,10 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
     private val filePicker = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { viewModel.onFileSelected(it) }
+        uri?.let {
+            val fileName = uri.lastPathSegment?.substringAfterLast('/') ?: "file"
+            viewModel.onFileSelected(it, fileName)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,12 +60,60 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         val userId = arguments?.getString(BundleKeys.USER_ID)
 
         if (isEditMode && postId != null) {
-            viewModel.initEditMode(postId)
+            viewModel.initEditMode(
+                postId = postId,
+                attachmentUrl = arguments?.getString(BundleKeys.ATTACHMENT_URL),
+                attachmentType = arguments?.getString(BundleKeys.ATTACHMENT_TYPE)
+            )
             binding.topAppBar.title = getString(R.string.edit_post)
+
             arguments?.getString("originalContent")?.let { content ->
                 binding.textPost.setText(content)
                 binding.textPost.setSelection(content.length)
             }
+
+            val attachmentUrl = arguments?.getString(BundleKeys.ATTACHMENT_URL)
+            val attachmentType = arguments?.getString(BundleKeys.ATTACHMENT_TYPE)
+
+            if (!attachmentUrl.isNullOrBlank() && !attachmentType.isNullOrBlank()) {
+                binding.imageAttachmentContainer.visibility = View.VISIBLE
+
+                when (attachmentType) {
+                    "IMAGE" -> {
+                        binding.imageAttachment.visibility = View.VISIBLE
+                        binding.fileAttachmentPreview.visibility = View.GONE
+
+                        binding.imageAttachment.load(
+                            url = attachmentUrl,
+                            placeholder = R.drawable.ic_image_24,
+                            error = R.drawable.ic_broken_image_24
+                        )
+                    }
+                    "VIDEO", "AUDIO" -> {
+                        binding.imageAttachment.visibility = View.GONE
+                        binding.fileAttachmentPreview.visibility = View.VISIBLE
+                        binding.fileAttachmentPreview.text = attachmentUrl.substringAfterLast('/')
+                    }
+                }
+            }
+
+            val lat = arguments?.getDouble(BundleKeys.LAT)
+            val long = arguments?.getDouble(BundleKeys.LNG)
+
+            if (lat != null && long != null && (lat != 0.0 || long != 0.0)) {
+                viewModel.onLocationSelected(lat, long)
+                binding.mapContainer.visibility = View.VISIBLE
+            }
+
+            val mentionIds = arguments?.getStringArrayList(BundleKeys.MENTION_IDS) ?: emptyList()
+            if (mentionIds.isNotEmpty()) {
+                viewModel.onMentionsSelected(mentionIds)
+            }
+        }
+
+        setFragmentResultListener(BundleKeys.MENTIONS_RESULT) { _, bundle ->
+            val selectedIds = bundle.getStringArrayList(BundleKeys.SELECTED_USER_IDS) ?: emptyList()
+            viewModel.onMentionsSelected(selectedIds)
         }
 
         setFragmentResultListener(BundleKeys.MAPS_RESULT) { _, bundle ->
@@ -74,7 +131,7 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
         binding.addPhoto.setOnClickListener { imagePicker.launch("image/*") }
         binding.addFile.setOnClickListener { filePicker.launch("*/*") }
         binding.addUsers.setOnClickListener {
-            Toast.makeText(requireContext(), "Выбор пользователей", Toast.LENGTH_SHORT).show()
+            UserSelectionDialogFragment().show(parentFragmentManager, UserSelectionDialogFragment.TAG)
         }
         binding.addLocation.setOnClickListener {
             findNavController().navigate(R.id.action_global_to_mapsFragment)
@@ -88,10 +145,13 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                 binding.textPost.error = getString(R.string.empty_field)
                 return@setOnMenuItemClickListener true
             }
+
+            val finalUserId = userId ?: tokenStorage.getUserId()
+
             if (isEditMode) {
-                viewModel.updatePost(content)
+                viewModel.updatePost(content, finalUserId)
             } else {
-                viewModel.createPost(content, userId)
+                viewModel.createPost(content, finalUserId)
             }
             true
         }
@@ -123,8 +183,10 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                             ).show()
                         }
                         is NewPostUiState.ImageSelected -> {
+                            android.util.Log.d("NewPost", "ImageSelected: showing imageAttachment")
                             binding.imageAttachmentContainer.visibility = View.VISIBLE
                             binding.imageAttachment.visibility = View.VISIBLE
+                            binding.fileAttachmentPreview.visibility = View.GONE
                             binding.imageAttachment.load(
                                 url = state.uri.toString(),
                                 placeholder = R.drawable.ic_image_24,
@@ -134,8 +196,21 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                         is NewPostUiState.ImageRemoved -> {
                             binding.imageAttachmentContainer.visibility = View.GONE
                             binding.imageAttachment.visibility = View.GONE
+                            binding.fileAttachmentPreview.visibility = View.GONE
+                        }
+                        is NewPostUiState.FileSelected -> {
+                            binding.imageAttachmentContainer.visibility = View.VISIBLE
+                            binding.imageAttachment.visibility = View.GONE
+                            binding.fileAttachmentPreview.visibility = View.VISIBLE
+                            binding.fileAttachmentPreview.text = state.fileName
+                        }
+                        is NewPostUiState.FileRemoved -> {
+                            binding.imageAttachmentContainer.visibility = View.GONE
+                            binding.imageAttachment.visibility = View.GONE
+                            binding.fileAttachmentPreview.visibility = View.GONE
                         }
                         is NewPostUiState.LocationSelected -> {
+                            android.util.Log.d("NewPost", "LocationSelected: showing mapContainer")
                             binding.mapContainer.visibility = View.VISIBLE
                         }
                         is NewPostUiState.LocationRemoved -> {

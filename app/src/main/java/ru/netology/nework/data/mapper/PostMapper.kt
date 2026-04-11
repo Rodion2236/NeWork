@@ -3,7 +3,7 @@ package ru.netology.nework.data.mapper
 import ru.netology.nework.data.remote.dto.PostDto
 import ru.netology.nework.domain.model.Post
 
-fun Post(dto: PostDto): Post = Post(
+fun Post(dto: PostDto, currentUserId: String?): Post = Post(
     id = dto.id.toString(),
     authorId = dto.authorId.toString(),
     author = dto.author,
@@ -19,7 +19,8 @@ fun Post(dto: PostDto): Post = Post(
     likedByMe = dto.likedByMe,
     likeCount = dto.likeOwnerIds.size,
     attachment = dto.attachment?.let { Attachment(it) },
-    users = dto.users.mapValues { it.value.let { previewDto -> UserPreview(previewDto) } }
+    users = dto.users.mapValues { it.value.let { previewDto -> UserPreview(previewDto) } },
+    currentUserId = currentUserId
 )
 
 fun PostDto(post: Post): PostDto = PostDto(

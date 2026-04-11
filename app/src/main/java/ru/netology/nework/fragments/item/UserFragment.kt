@@ -28,7 +28,9 @@ class UserFragment : Fragment(R.layout.fragment_user) {
 
     private val adapter: UserAdapter by lazy {
         UserAdapter(
-            onUserClick = { user -> openUserDetail(user) }
+            onUserClick = { user -> openUserDetail(user) },
+            showCheckbox = false,
+            onUserToggle = null
         )
     }
 

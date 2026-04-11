@@ -160,6 +160,18 @@ class UserWallFragment : Fragment(R.layout.fragment_posts) {
                             putString(BundleKeys.POST_ID, post.id)
                             putBoolean("isEditMode", true)
                             putString("originalContent", post.content)
+
+                            post.attachment?.let { attachment ->
+                                putString(BundleKeys.ATTACHMENT_URL, attachment.url)
+                                putString(BundleKeys.ATTACHMENT_TYPE, attachment.type.name)
+                            }
+
+                            post.coords?.let { coords ->
+                                putDouble(BundleKeys.LAT, coords.lat)
+                                putDouble(BundleKeys.LNG, coords.long)
+                            }
+
+                            putStringArrayList(BundleKeys.MENTION_IDS, ArrayList(post.mentionIds))
                         }
                         findNavController().navigate(R.id.newPostFragment, bundle)
                         true

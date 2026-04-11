@@ -107,4 +107,5 @@
     <string name="no_app_to_open">Нет приложения для открытия ссылки</string>
     <string name="failed_to_open_link">Не удалось открыть ссылку</string>
     <string name="current_job">Работаю здесь сейчас</string>
+    <string name="select_users">Выберите пользователей</string>
 </resources>

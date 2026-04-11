@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,18 +15,48 @@ import ru.netology.nework.domain.repository.PostsRepository
 import javax.inject.Inject
 
 @HiltViewModel
-class FeedViewModel @Inject constructor(private val postsRepository: PostsRepository) : ViewModel() {
-    val posts: Flow<PagingData<Post>> = postsRepository.getPosts()
-        .cachedIn(viewModelScope)
+class FeedViewModel @Inject constructor(
+    private val postsRepository: PostsRepository
+) : ViewModel() {
+
+    private val _posts = MutableStateFlow<PagingData<Post>>(PagingData.empty())
+    val posts: StateFlow<PagingData<Post>> = _posts.asStateFlow()
 
     private val _uiState = MutableStateFlow<FeedUiState>(FeedUiState.Idle)
     val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
 
-    fun toggleLike(postId: String, currentLiked: Boolean) {
+    init {
+        loadPosts()
+    }
+
+    private fun loadPosts() {
         viewModelScope.launch {
-            postsRepository.likePost(postId, !currentLiked)
-                .onFailure { error ->
-                    _uiState.value = FeedUiState.Error("like_failed")
+            postsRepository.getPosts()
+                .cachedIn(viewModelScope)
+                .collect { pagingData ->
+                    _posts.value = pagingData
+                }
+        }
+    }
+
+    fun toggleLike(postId: String, liked: Boolean) {
+        viewModelScope.launch {
+            val updatedPagingData = _posts.value.map { post ->
+                if (post.id == postId) {
+                    post.copy(
+                        likedByMe = !liked,
+                        likeCount = if (!liked) post.likeCount + 1 else post.likeCount - 1
+                    )
+                } else post
+            }
+            _posts.value = updatedPagingData
+
+            postsRepository.likePost(postId, !liked)
+                .onSuccess {
+                    loadPosts()
+                }
+                .onFailure {
+                    loadPosts()
                 }
         }
     }
@@ -35,6 +65,7 @@ class FeedViewModel @Inject constructor(private val postsRepository: PostsReposi
         viewModelScope.launch {
             postsRepository.deletePost(postId)
                 .onSuccess {
+                    loadPosts()
                     _uiState.value = FeedUiState.Success("post_deleted")
                 }
                 .onFailure { error ->
@@ -43,7 +74,9 @@ class FeedViewModel @Inject constructor(private val postsRepository: PostsReposi
         }
     }
 
-    fun refresh() {}
+    fun refresh() {
+        loadPosts()
+    }
 }
 
 sealed class FeedUiState {

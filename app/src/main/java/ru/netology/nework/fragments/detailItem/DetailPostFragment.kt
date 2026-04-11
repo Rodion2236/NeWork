@@ -102,20 +102,23 @@ class DetailPostFragment : Fragment(R.layout.fragment_detail_post) {
         )
         binding.content.text = post.content
 
-        binding.buttonLike.isChecked = post.likedByMe
+        binding.buttonLike.isChecked = post.isLikedByMe
 
-        val likers = post.users.values.map { preview ->
-            DomainUser(
-                id = "",
-                login = "",
-                name = preview.name,
-                avatar = preview.avatar
-            )
-        }.take(10)
+        val likers = post.likeOwnerIds
+            .mapNotNull { id -> post.users[id.toString()] }
+            .map { preview ->
+                DomainUser(
+                    id = "",
+                    login = "",
+                    name = preview.name,
+                    avatar = preview.avatar
+                )
+            }
+            .take(10)
         likersAdapter.submitList(likers)
 
         val mentionedUsers = post.users
-            .filterKeys { it in post.mentionIds }
+            .filterKeys { it in post.mentionIds.map { it.toString() } }
             .values
             .map { preview ->
                 DomainUser(

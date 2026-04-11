@@ -21,27 +21,52 @@ class NewPostViewModel @Inject constructor(
 
     private var selectedImage: Uri? = null
     private var selectedFile: Uri? = null
+    private var selectedFileName: String? = null
     private var locationCoords: Pair<Double, Double>? = null
     private var mentionIds: List<String> = emptyList()
 
     private var editPostId: String? = null
 
-    fun initEditMode(postId: String) {
+    private var currentAttachmentUrl: String? = null
+    private var currentAttachmentType: String? = null
+
+    fun initEditMode(postId: String, attachmentUrl: String? = null, attachmentType: String? = null) {
         editPostId = postId
+        currentAttachmentUrl = attachmentUrl
+        currentAttachmentType = attachmentType
     }
 
     fun onImageSelected(uri: Uri) {
         selectedImage = uri
+        selectedFile = null
+        selectedFileName = null
+        currentAttachmentUrl = null
+        currentAttachmentType = null
         _uiState.value = NewPostUiState.ImageSelected(uri)
     }
 
     fun onImageRemoved() {
         selectedImage = null
+        currentAttachmentUrl = null
+        currentAttachmentType = null
         _uiState.value = NewPostUiState.ImageRemoved
     }
 
-    fun onFileSelected(uri: Uri) {
+    fun onFileSelected(uri: Uri, fileName: String? = null) {
         selectedFile = uri
+        selectedFileName = fileName ?: uri.lastPathSegment?.substringAfterLast('/') ?: "file"
+        selectedImage = null
+        currentAttachmentUrl = null
+        currentAttachmentType = null
+        _uiState.value = NewPostUiState.FileSelected(uri, selectedFileName!!)
+    }
+
+    fun onFileRemoved() {
+        selectedFile = null
+        selectedFileName = null
+        currentAttachmentUrl = null
+        currentAttachmentType = null
+        _uiState.value = NewPostUiState.FileRemoved
     }
 
     fun onLocationSelected(lat: Double, long: Double) {
@@ -54,17 +79,37 @@ class NewPostViewModel @Inject constructor(
         _uiState.value = NewPostUiState.LocationRemoved
     }
 
-    fun onMentionsSelected(ids: List<String>) {
-        mentionIds = ids
+    fun onMentionsSelected(ids: List<String>) { mentionIds = ids }
+
+    private fun getAttachmentUri(): Pair<Uri?, Uri?> {
+        val finalImageUri = when {
+            selectedImage != null -> selectedImage
+            editPostId != null && !currentAttachmentUrl.isNullOrBlank() && currentAttachmentType == "IMAGE" -> {
+                Uri.parse(currentAttachmentUrl)
+            }
+            else -> null
+        }
+
+        val finalFileUri = when {
+            selectedFile != null -> selectedFile
+            editPostId != null && !currentAttachmentUrl.isNullOrBlank() && currentAttachmentType in listOf("VIDEO", "AUDIO") -> {
+                Uri.parse(currentAttachmentUrl)
+            }
+            else -> null
+        }
+
+        return Pair(finalImageUri, finalFileUri)
     }
 
     fun createPost(content: String, userId: String? = null) {
         viewModelScope.launch {
             _uiState.value = NewPostUiState.Loading
+            val (imageUri, fileUri) = getAttachmentUri()
+
             postsRepository.createPost(
                 content = content,
-                imageUri = selectedImage,
-                fileUri = selectedFile,
+                imageUri = imageUri,
+                fileUri = fileUri,
                 coords = locationCoords,
                 mentionIds = mentionIds,
                 userId = userId
@@ -74,18 +119,21 @@ class NewPostViewModel @Inject constructor(
         }
     }
 
-    fun updatePost(content: String) {
+    fun updatePost(content: String, userId: String? = null) {
         val postId = editPostId ?: return
         viewModelScope.launch {
             _uiState.value = NewPostUiState.Loading
             postsRepository.deletePost(postId)
                 .onSuccess {
+                    val (imageUri, fileUri) = getAttachmentUri()
+
                     postsRepository.createPost(
                         content = content,
-                        imageUri = selectedImage,
-                        fileUri = selectedFile,
+                        imageUri = imageUri,
+                        fileUri = fileUri,
                         coords = locationCoords,
-                        mentionIds = mentionIds
+                        mentionIds = mentionIds,
+                        userId = userId
                     )
                         .onSuccess { _uiState.value = NewPostUiState.Success }
                         .onFailure { _uiState.value = NewPostUiState.Error(it.message ?: "Unknown error") }

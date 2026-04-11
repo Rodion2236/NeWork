@@ -16,8 +16,12 @@ data class Post(
     val likedByMe: Boolean,
     val likeCount: Int,
     val attachment: Attachment?,
-    val users: Map<String, UserPreview>
-)
+    val users: Map<String, UserPreview>,
+    val currentUserId: String? = null
+) {
+    val isLikedByMe: Boolean
+        get() = likedByMe || (currentUserId != null && likeOwnerIds.contains(currentUserId))
+}
 
 data class Attachment(
     val url: String,

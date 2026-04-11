@@ -9,6 +9,8 @@ sealed class NewPostUiState {
     data class Error(val message: String) : NewPostUiState()
     data class ImageSelected(val uri: Uri) : NewPostUiState()
     object ImageRemoved : NewPostUiState()
+    data class FileSelected(val uri: Uri, val fileName: String) : NewPostUiState()
+    object FileRemoved : NewPostUiState()
     object LocationSelected : NewPostUiState()
     object LocationRemoved : NewPostUiState()
 }

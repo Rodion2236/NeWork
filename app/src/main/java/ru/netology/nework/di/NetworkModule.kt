@@ -8,9 +8,11 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import ru.netology.nework.BuildConfig
 import ru.netology.nework.data.remote.api.AuthApi
 import ru.netology.nework.data.remote.api.EventsApi
 import ru.netology.nework.data.remote.api.JobsApi
+import ru.netology.nework.data.remote.api.MediaApi
 import ru.netology.nework.data.remote.api.PostsApi
 import ru.netology.nework.data.remote.api.UsersApi
 import ru.netology.nework.data.remote.interceptor.ApiKeyInterceptor
@@ -71,4 +73,24 @@ object NetworkModule {
     @Provides
     fun provideJobsApi(retrofit: Retrofit): JobsApi =
         retrofit.create(JobsApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMediaApi(): MediaApi {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Api-Key", BuildConfig.NETOLOGY_API_KEY)
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl("http://94.228.125.136:8080/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MediaApi::class.java)
+    }
 }

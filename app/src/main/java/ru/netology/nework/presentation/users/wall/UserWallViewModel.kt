@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,9 +34,11 @@ class UserWallViewModel @Inject constructor(
 
     private fun loadPosts() {
         viewModelScope.launch {
-            usersRepository.getUserWall(userId).collect { pagingData ->
-                _posts.value = pagingData
-            }
+            usersRepository.getUserWall(userId)
+                .cachedIn(viewModelScope)
+                .collect { pagingData ->
+                    _posts.value = pagingData
+                }
         }
     }
 
@@ -44,7 +48,23 @@ class UserWallViewModel @Inject constructor(
 
     fun toggleLike(postId: String, liked: Boolean) {
         viewModelScope.launch {
+            val updatedPagingData = _posts.value.map { post ->
+                if (post.id == postId) {
+                    post.copy(
+                        likedByMe = !liked,
+                        likeCount = if (!liked) post.likeCount + 1 else post.likeCount - 1
+                    )
+                } else post
+            }
+            _posts.value = updatedPagingData
+
             postsRepository.likePost(postId, !liked)
+                .onSuccess {
+                    loadPosts()
+                }
+                .onFailure {
+                    loadPosts()
+                }
         }
     }
 

@@ -45,7 +45,7 @@ class DetailPostViewModel @Inject constructor(
         viewModelScope.launch {
             val currentState = _uiState.value
             if (currentState is DetailPostUiState.Success) {
-                val newLiked = !currentState.post.likedByMe
+                val newLiked = !currentState.post.isLikedByMe
                 postsRepository.likePost(currentState.post.id, newLiked)
                     .onSuccess {
                         val updatedPost = currentState.post.copy(
@@ -55,7 +55,9 @@ class DetailPostViewModel @Inject constructor(
                         )
                         _uiState.value = DetailPostUiState.Success(updatedPost)
                     }
-                    .onFailure {}
+                    .onFailure {
+                        loadPost()
+                    }
             }
         }
     }

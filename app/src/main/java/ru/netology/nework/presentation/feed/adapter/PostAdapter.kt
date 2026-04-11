@@ -98,7 +98,7 @@ abstract class PostViewHolder(
     protected fun setupClicks(post: Post) {
         binding.root.setOnClickListener { onPostClick(post) }
         binding.buttonLike.setOnClickListener {
-            onLikeClick(post.id, post.likedByMe)
+            onLikeClick(post.id, post.isLikedByMe)
         }
         binding.buttonOption.setOnClickListener { view ->
             onMenuClick(post, view)
@@ -129,7 +129,8 @@ class TextPostViewHolder(
         binding.imageContent.visibility = View.GONE
         binding.videoContent.visibility = View.GONE
         binding.audioContent.visibility = View.GONE
-        binding.buttonLike.isChecked = post.likedByMe
+
+        binding.buttonLike.isChecked = post.isLikedByMe
         binding.likeCount.text = post.likeCount.toString()
         binding.buttonOption.visibility = if (post.authorId == currentUserId) {
             View.VISIBLE
@@ -168,7 +169,7 @@ class ImagePostViewHolder(
             centerCrop = true
         )
 
-        binding.buttonLike.isChecked = post.likedByMe
+        binding.buttonLike.isChecked = post.isLikedByMe
         binding.likeCount.text = post.likeCount.toString()
         binding.buttonOption.visibility = if (post.authorId == currentUserId) {
             View.VISIBLE
@@ -210,7 +211,7 @@ class VideoPostViewHolder(
 
         setupPlayerView(post.attachment?.url)
 
-        binding.buttonLike.isChecked = post.likedByMe
+        binding.buttonLike.isChecked = post.isLikedByMe
         binding.likeCount.text = post.likeCount.toString()
         binding.buttonOption.visibility = if (post.authorId == currentUserId) {
             View.VISIBLE
@@ -295,7 +296,7 @@ class AudioPostViewHolder(
         currentAudioUrl = post.attachment?.url?.trim()
         isBound = true
 
-        binding.buttonLike.isChecked = post.likedByMe
+        binding.buttonLike.isChecked = post.isLikedByMe
         binding.likeCount.text = post.likeCount.toString()
         binding.buttonOption.visibility = if (post.authorId == currentUserId) {
             View.VISIBLE

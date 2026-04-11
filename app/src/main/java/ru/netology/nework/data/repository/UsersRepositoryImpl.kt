@@ -50,7 +50,7 @@ class UsersRepositoryImpl @Inject constructor(
             val response = usersApi.getUserWall(userId)
             if (!response.isSuccessful) throw ApiError(response.code(), "wall_error")
             val postsDto = response.body() ?: throw ApiError(response.code(), "empty_response")
-            emit(PagingData.from(postsDto.map { Post(it) }))
+            emit(PagingData.from(postsDto.map { Post(it, null) }))
         } catch (e: Exception) {
             emit(PagingData.from(emptyList()))
         }

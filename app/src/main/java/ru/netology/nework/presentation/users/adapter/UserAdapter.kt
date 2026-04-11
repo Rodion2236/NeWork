@@ -12,14 +12,16 @@ import ru.netology.nework.domain.model.User
 import ru.netology.nework.util.load
 
 class UserAdapter(
-    private val onUserClick: (User) -> Unit
+    private val onUserClick: (User) -> Unit,
+    private val showCheckbox: Boolean = false,
+    private val onUserToggle: ((String, Boolean) -> Unit)? = null
 ) : ListAdapter<User, UserViewHolder>(UserDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
         val binding = CardUserBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return UserViewHolder(binding, onUserClick)
+        return UserViewHolder(binding, onUserClick, showCheckbox, onUserToggle)
     }
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
@@ -34,7 +36,9 @@ class UserDiffCallback : DiffUtil.ItemCallback<User>() {
 
 class UserViewHolder(
     private val binding: CardUserBinding,
-    private val onUserClick: (User) -> Unit
+    private val onUserClick: (User) -> Unit,
+    private val showCheckbox: Boolean,
+    private val onUserToggle: ((String, Boolean) -> Unit)?
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(user: User) {
@@ -48,8 +52,20 @@ class UserViewHolder(
             roundedCorners = 24
         )
 
-        binding.checkBox.visibility = View.GONE
+        binding.checkBox.visibility = if (showCheckbox) View.VISIBLE else View.GONE
 
-        binding.root.setOnClickListener { onUserClick(user) }
+        if (showCheckbox && onUserToggle != null) {
+            binding.checkBox.isEnabled = true
+            binding.checkBox.setOnCheckedChangeListener(null)
+            binding.checkBox.isChecked = false
+            binding.checkBox.setOnCheckedChangeListener { _, isChecked ->
+                onUserToggle(user.id, isChecked)
+            }
+            binding.root.setOnClickListener {
+                binding.checkBox.isChecked = !binding.checkBox.isChecked
+            }
+        } else {
+            binding.root.setOnClickListener { onUserClick(user) }
+        }
     }
 }
