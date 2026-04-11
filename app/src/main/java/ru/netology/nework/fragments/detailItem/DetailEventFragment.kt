@@ -106,8 +106,10 @@ class DetailEventFragment : Fragment(R.layout.fragment_detail_event) {
             EventType.ONLINE -> getString(R.string.online)
             EventType.OFFLINE -> getString(R.string.offline)
         }
-        binding.dateEvent.text = DateUtils.formatIsoDate(event.datetime)
-
+        binding.dateEvent.text = DateUtils.formatIsoDate(
+            isoString = event.datetime,
+            errorText = getString(R.string.date_error)
+        )
         binding.content.text = event.content
 
         binding.buttonLike.isChecked = event.likedByMe

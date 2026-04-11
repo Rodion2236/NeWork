@@ -69,7 +69,7 @@ class EventsRepositoryImpl @Inject constructor(
 
             val eventDto = EventCreateDto(
                 content = content,
-                datetime = datetime ?: System.currentTimeMillis(),
+                datetime = (datetime ?: System.currentTimeMillis()) / 1000,
                 type = type.name,
                 coords = coords?.let { CoordsDto(it.first, it.second) },
                 speakerIds = if (speakerIds.isNotEmpty()) speakerIds.mapNotNull { it.toIntOrNull() } else null

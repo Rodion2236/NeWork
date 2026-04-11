@@ -94,4 +94,5 @@
     <string name="login_too_short">Логин должен содержать минимум 3 символа</string>
     <string name="password_too_short">Пароль должен содержать минимум 6 символов</string>
     <string name="select_event_type_and_date">Выбрать тип и дату</string>
+    <string name="date_error">Ошибка даты</string>
 </resources>

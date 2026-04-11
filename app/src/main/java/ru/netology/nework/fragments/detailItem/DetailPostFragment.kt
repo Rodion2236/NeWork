@@ -96,7 +96,10 @@ class DetailPostFragment : Fragment(R.layout.fragment_detail_post) {
             roundedCorners = 24
         )
 
-        binding.datePublished.text = DateUtils.formatIsoDate(post.published)
+        binding.datePublished.text = DateUtils.formatIsoDate(
+            isoString = post.published,
+            errorText = getString(R.string.date_error)
+        )
         binding.content.text = post.content
 
         binding.buttonLike.isChecked = post.likedByMe

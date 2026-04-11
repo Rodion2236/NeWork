@@ -95,4 +95,5 @@
     <string name="login_too_short">The login must contain at least 3 characters.</string>
     <string name="password_too_short">The password must contain at least 6 characters.</string>
     <string name="select_event_type_and_date">Select event type and date</string>
+    <string name="date_error">Invalid date</string>
 </resources>
