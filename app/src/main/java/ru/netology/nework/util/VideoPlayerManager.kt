@@ -1,7 +1,6 @@
 package ru.netology.nework.util
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -42,24 +41,15 @@ class VideoPlayerManager @Inject constructor(
                     playWhenReady = false
                     addListener(object : Player.Listener {
                         override fun onPlayerError(error: PlaybackException) {
-                            Log.e("MediaPlayer", "Error: ${error.message}", error)
                             onVideoError?.invoke(error.message ?: "Unknown error")
                         }
 
                         override fun onPlaybackStateChanged(state: Int) {
                             when (state) {
-                                Player.STATE_READY -> {
-                                    Log.d("MediaPlayer", "Video ready")
-                                }
-                                Player.STATE_BUFFERING -> {
-                                    Log.d("MediaPlayer", "Buffering...")
-                                }
-                                Player.STATE_ENDED -> {
-                                    Log.d("MediaPlayer", "Video ended")
-                                }
-                                Player.STATE_IDLE -> {
-                                    Log.d("MediaPlayer", "Player idle")
-                                }
+                                Player.STATE_READY -> {}
+                                Player.STATE_BUFFERING -> {}
+                                Player.STATE_ENDED -> {}
+                                Player.STATE_IDLE -> {}
                             }
                         }
 

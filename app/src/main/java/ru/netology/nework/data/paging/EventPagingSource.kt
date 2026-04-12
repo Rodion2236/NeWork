@@ -33,7 +33,7 @@ class EventPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, Event>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Event>): Int {
         return 0
     }
 }

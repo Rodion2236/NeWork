@@ -3,7 +3,6 @@ package ru.netology.nework.fragments.newItem
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -165,14 +164,6 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                         is NewPostUiState.Loading -> {}
                         is NewPostUiState.Ready -> {}
                         is NewPostUiState.Success -> {
-                            Toast.makeText(
-                                requireContext(),
-                                if (arguments?.getBoolean("isEditMode") == true)
-                                    getString(R.string.post_updated)
-                                else
-                                    getString(R.string.post_created),
-                                Toast.LENGTH_SHORT
-                            ).show()
                             findNavController().navigateUp()
                         }
                         is NewPostUiState.Error -> {
@@ -183,7 +174,6 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                             ).show()
                         }
                         is NewPostUiState.ImageSelected -> {
-                            android.util.Log.d("NewPost", "ImageSelected: showing imageAttachment")
                             binding.imageAttachmentContainer.visibility = View.VISIBLE
                             binding.imageAttachment.visibility = View.VISIBLE
                             binding.fileAttachmentPreview.visibility = View.GONE
@@ -210,7 +200,6 @@ class NewPostFragment : Fragment(R.layout.fragment_new_post) {
                             binding.fileAttachmentPreview.visibility = View.GONE
                         }
                         is NewPostUiState.LocationSelected -> {
-                            android.util.Log.d("NewPost", "LocationSelected: showing mapContainer")
                             binding.mapContainer.visibility = View.VISIBLE
                         }
                         is NewPostUiState.LocationRemoved -> {

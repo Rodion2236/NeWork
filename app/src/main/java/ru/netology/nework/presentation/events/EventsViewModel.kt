@@ -41,7 +41,7 @@ class EventsViewModel @Inject constructor(
     fun toggleLike(eventId: String, currentLiked: Boolean) {
         viewModelScope.launch {
             eventsRepository.likeEvent(eventId, !currentLiked)
-                .onFailure { error ->
+                .onFailure { _ ->
                     _uiState.value = EventsUiState.Error("like_failed")
                 }
         }
@@ -67,7 +67,7 @@ class EventsViewModel @Inject constructor(
                     loadEvents()
                     _uiState.value = EventsUiState.Success("event_deleted")
                 }
-                .onFailure { error ->
+                .onFailure { _ ->
                     _uiState.value = EventsUiState.Error("delete_failed")
                 }
         }

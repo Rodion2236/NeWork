@@ -2,7 +2,6 @@ package ru.netology.nework.data.repository
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -92,15 +91,9 @@ class AuthRepositoryImpl @Inject constructor(
             tokenStorage.saveToken(tokenResponse.token, tokenResponse.id)
             Result.success(AuthResult(tokenResponse))
 
-        } catch (e: IOException) {
-            Log.e("AuthRepository", "register: network error", e)
-            Result.failure(NetworkError)
-        } catch (e: ApiError) {
-            Log.e("AuthRepository", "register: api error", e)
-            Result.failure(e)
-        } catch (e: Exception) {
-            Log.e("AuthRepository", "register: unknown error", e)
-            Result.failure(AppError.from(e))
+        } catch (e: IOException) { Result.failure(NetworkError)
+        } catch (e: ApiError) { Result.failure(e)
+        } catch (e: Exception) { Result.failure(AppError.from(e))
         }
     }
 
@@ -118,13 +111,10 @@ class AuthRepositoryImpl @Inject constructor(
             Result.success(User(userDto))
 
         } catch (e: IOException) {
-            Log.e("AuthRepository", "getUserById: network error", e)
             Result.failure(NetworkError)
         } catch (e: ApiError) {
-            Log.e("AuthRepository", "getUserById: api error", e)
             Result.failure(e)
         } catch (e: Exception) {
-            Log.e("AuthRepository", "getUserById: unknown error", e)
             Result.failure(AppError.from(e))
         }
     }

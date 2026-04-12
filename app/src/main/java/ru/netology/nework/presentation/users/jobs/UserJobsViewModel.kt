@@ -37,8 +37,4 @@ class UserJobsViewModel @Inject constructor(
                 .onFailure {}
         }
     }
-
-    fun removeJob(jobId: String) {
-        // TODO: Вызов репозитория для удаления
-    }
 }

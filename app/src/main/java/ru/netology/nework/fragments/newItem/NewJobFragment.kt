@@ -2,7 +2,6 @@ package ru.netology.nework.fragments.newItem
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -15,7 +14,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentNewJobBinding
-import ru.netology.nework.presentation.newjob.NewJobViewModel
+import ru.netology.nework.presentation.newjobs.NewJobViewModel
 import ru.netology.nework.presentation.newjobs.NewJobUiState
 import ru.netology.nework.util.BundleKeys
 
@@ -88,7 +87,6 @@ class NewJobFragment : Fragment(R.layout.fragment_new_job) {
                 return@setOnClickListener
             }
             if (startDate == null) {
-                Toast.makeText(requireContext(), "Выберите дату начала", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -104,7 +102,6 @@ class NewJobFragment : Fragment(R.layout.fragment_new_job) {
                         is NewJobUiState.Loading -> {}
                         is NewJobUiState.Ready -> {}
                         is NewJobUiState.Success -> {
-                            Toast.makeText(requireContext(), "Работа создана", Toast.LENGTH_SHORT).show()
                             findNavController().navigateUp()
                         }
                         is NewJobUiState.Error -> {

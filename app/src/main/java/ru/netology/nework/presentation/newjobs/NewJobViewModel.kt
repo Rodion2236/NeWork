@@ -1,4 +1,4 @@
-package ru.netology.nework.presentation.newjob
+package ru.netology.nework.presentation.newjobs
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.netology.nework.domain.repository.JobsRepository
-import ru.netology.nework.presentation.newjobs.NewJobUiState
 import javax.inject.Inject
 
 @HiltViewModel

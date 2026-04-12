@@ -40,7 +40,7 @@ class PostPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, Post>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Post>): Int {
         return 0
     }
 }

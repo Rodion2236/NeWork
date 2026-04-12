@@ -68,7 +68,7 @@ class FeedViewModel @Inject constructor(
                     loadPosts()
                     _uiState.value = FeedUiState.Success("post_deleted")
                 }
-                .onFailure { error ->
+                .onFailure { _ ->
                     _uiState.value = FeedUiState.Error("delete_failed")
                 }
         }

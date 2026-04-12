@@ -1,7 +1,6 @@
 package ru.netology.nework.fragments.item
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
@@ -30,18 +29,15 @@ class MapsFragment : Fragment(R.layout.fragment_maps) {
     private var selectedPoint: Point = Point(55.751244, 37.618423)
     private val inputListener = object : InputListener {
         override fun onMapTap(map: Map, point: Point) {
-            Log.d(TAG, "onMapTap: lat=${point.latitude}, lng=${point.longitude}")
             handlePointSelected(point, map)
         }
 
         override fun onMapLongTap(map: Map, point: Point) {
-            Log.d(TAG, "onMapLongTap: lat=${point.latitude}, lng=${point.longitude}")
             handlePointSelected(point, map)
         }
     }
 
     companion object {
-        private const val TAG = "MapsFragment"
         const val RESULT_KEY = "maps_result"
         private const val KEY_LAT = "lat"
         private const val KEY_LNG = "long"
@@ -62,8 +58,6 @@ class MapsFragment : Fragment(R.layout.fragment_maps) {
         setupToolbar()
         setupMap(map)
         setupListeners(map)
-
-        Log.d(TAG, "onViewCreated: ready")
     }
 
     private fun setupToolbar() {
@@ -72,7 +66,6 @@ class MapsFragment : Fragment(R.layout.fragment_maps) {
         }
         binding.topAppBar.setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == R.id.save) {
-                Log.d(TAG, "Confirm clicked: lat=${selectedPoint.latitude}, lng=${selectedPoint.longitude}")
                 returnResult()
                 true
             } else {
@@ -82,14 +75,11 @@ class MapsFragment : Fragment(R.layout.fragment_maps) {
     }
 
     private fun setupMap(map: Map) {
-        Log.d(TAG, "setupMap: centering on $selectedPoint")
         map.move(CameraPosition(selectedPoint, 15f, 0f, 0f))
         addPlacemark(selectedPoint)
     }
 
     private fun setupListeners(map: Map) {
-        Log.d(TAG, "setupListeners: adding InputListener")
-
         map.isRotateGesturesEnabled = true
         map.isZoomGesturesEnabled = true
         map.isScrollGesturesEnabled = true
@@ -105,7 +95,6 @@ class MapsFragment : Fragment(R.layout.fragment_maps) {
             Animation(Animation.Type.SMOOTH, 0.3f),
             null
         )
-        Log.d(TAG, "Point selected: $point")
     }
 
     private fun addPlacemark(point: Point) {

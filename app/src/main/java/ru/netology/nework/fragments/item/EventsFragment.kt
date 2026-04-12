@@ -149,7 +149,6 @@ class EventsFragment : Fragment(R.layout.fragment_event) {
                             putString("originalContent", event.content)
                         }
                         findNavController().navigate(R.id.newEventFragment, bundle)
-                        true
                     }
                     R.id.delete -> {
                         MaterialAlertDialogBuilder(requireContext())
