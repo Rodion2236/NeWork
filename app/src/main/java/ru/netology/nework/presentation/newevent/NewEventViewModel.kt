@@ -1,5 +1,6 @@
 package ru.netology.nework.presentation.newevent
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,15 +20,50 @@ class NewEventViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<NewEventUiState>(NewEventUiState.Ready)
     val uiState: StateFlow<NewEventUiState> = _uiState.asStateFlow()
 
+    private var selectedImage: Uri? = null
+    private var selectedFile: Uri? = null
+    private var selectedFileName: String? = null
+
     private var selectedType: EventType = EventType.ONLINE
     private var selectedDate: Long? = null
     private var locationCoords: Pair<Double, Double>? = null
     private var speakerIds: List<String> = emptyList()
 
     private var editEventId: String? = null
+    private var eventLink: String? = null
+
+
+    fun onLinkEntered(link: String) {
+        eventLink = link.takeIf { it.isNotBlank() }
+    }
 
     fun initEditMode(eventId: String) {
         editEventId = eventId
+    }
+
+    fun onImageSelected(uri: Uri) {
+        selectedImage = uri
+        selectedFile = null
+        selectedFileName = null
+        _uiState.value = NewEventUiState.ImageSelected(uri)
+    }
+
+    fun onImageRemoved() {
+        selectedImage = null
+        _uiState.value = NewEventUiState.ImageRemoved
+    }
+
+    fun onFileSelected(uri: Uri, fileName: String? = null) {
+        selectedFile = uri
+        selectedFileName = fileName ?: uri.lastPathSegment?.substringAfterLast('/') ?: "file"
+        selectedImage = null
+        _uiState.value = NewEventUiState.FileSelected(uri, selectedFileName!!)
+    }
+
+    fun onFileRemoved() {
+        selectedFile = null
+        selectedFileName = null
+        _uiState.value = NewEventUiState.FileRemoved
     }
 
     fun onTypeSelected(type: EventType) {
@@ -62,7 +98,10 @@ class NewEventViewModel @Inject constructor(
                 type = selectedType,
                 datetime = selectedDate,
                 coords = locationCoords,
-                speakerIds = speakerIds
+                speakerIds = speakerIds,
+                link = eventLink,
+                imageUri = selectedImage,
+                fileUri = selectedFile
             )
                 .onSuccess { _uiState.value = NewEventUiState.Success }
                 .onFailure { _uiState.value = NewEventUiState.Error(it.message ?: "Unknown error") }
@@ -80,7 +119,10 @@ class NewEventViewModel @Inject constructor(
                         type = selectedType,
                         datetime = selectedDate,
                         coords = locationCoords,
-                        speakerIds = speakerIds
+                        speakerIds = speakerIds,
+                        link = eventLink,
+                        imageUri = selectedImage,
+                        fileUri = selectedFile
                     )
                         .onSuccess { _uiState.value = NewEventUiState.Success }
                         .onFailure { _uiState.value = NewEventUiState.Error(it.message ?: "Unknown error") }

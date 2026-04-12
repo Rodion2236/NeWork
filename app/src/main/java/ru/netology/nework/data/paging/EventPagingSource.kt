@@ -13,8 +13,7 @@ class EventPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Event> {
         return try {
-            val currentPage = params.key ?: 0
-            val offset = currentPage * pageSize
+            val offset = maxOf(0, params.key ?: 0)
 
             val response = api.getEventsLatest(count = pageSize, offset = offset)
             if (!response.isSuccessful) {
@@ -26,8 +25,8 @@ class EventPagingSource(
 
             LoadResult.Page(
                 data = events,
-                prevKey = if (currentPage == 0) null else currentPage - 1,
-                nextKey = if (events.isEmpty()) null else currentPage + 1
+                prevKey = if (offset <= 0) null else offset - pageSize,
+                nextKey = if (events.isEmpty()) null else offset + pageSize
             )
         } catch (e: Exception) {
             LoadResult.Error(e)
@@ -35,9 +34,6 @@ class EventPagingSource(
     }
 
     override fun getRefreshKey(state: PagingState<Int, Event>): Int? {
-        return state.anchorPosition?.let { anchorPosition ->
-            state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
-                ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
-        }
+        return 0
     }
 }

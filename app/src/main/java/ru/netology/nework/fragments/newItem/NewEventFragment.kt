@@ -1,8 +1,10 @@
 package ru.netology.nework.fragments.newItem
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -16,9 +18,11 @@ import kotlinx.coroutines.launch
 import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentNewEventBinding
 import ru.netology.nework.fragments.dialog.BottomSheetDialogFragment
+import ru.netology.nework.fragments.dialog.UserSelectionDialogFragment
 import ru.netology.nework.presentation.newevent.NewEventUiState
 import ru.netology.nework.presentation.newevent.NewEventViewModel
 import ru.netology.nework.util.BundleKeys
+import ru.netology.nework.util.load
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -30,6 +34,21 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
 
     private var _binding: FragmentNewEventBinding? = null
     private val binding get() = _binding!!
+
+    private val imagePicker = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.onImageSelected(it) }
+    }
+
+    private val filePicker = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val fileName = uri.lastPathSegment?.substringAfterLast('/') ?: "file"
+            viewModel.onFileSelected(it, fileName)
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -65,8 +84,12 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
             bundle.getLong(BundleKeys.EVENT_DATETIME, 0L).takeIf { it > 0 }?.let { timestamp ->
                 viewModel.onDateSelected(timestamp)
                 binding.buttonSetDate.contentDescription = formatTimestampForUi(timestamp)
-                Toast.makeText(requireContext(), "Дата: ${formatTimestampForUi(timestamp)}", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        setFragmentResultListener(BundleKeys.SELECTED_USER_IDS) { _, bundle ->
+            val selectedIds = bundle.getStringArrayList(BundleKeys.SELECTED_USER_IDS) ?: emptyList()
+            viewModel.onSpeakersSelected(selectedIds)
         }
 
         setupClicks(isEditMode)
@@ -79,16 +102,11 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
             BottomSheetDialogFragment().show(parentFragmentManager, BottomSheetDialogFragment.TAG)
         }
 
-        binding.addPhoto.setOnClickListener {
-            Toast.makeText(requireContext(), "Добавление фото", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.addFile.setOnClickListener {
-            Toast.makeText(requireContext(), "Добавление файла", Toast.LENGTH_SHORT).show()
-        }
+        binding.addPhoto.setOnClickListener { imagePicker.launch("image/*") }
+        binding.addFile.setOnClickListener { filePicker.launch("*/*") }
 
         binding.addUser.setOnClickListener {
-            Toast.makeText(requireContext(), "Выбор пользователей", Toast.LENGTH_SHORT).show()
+            UserSelectionDialogFragment().show(parentFragmentManager, UserSelectionDialogFragment.TAG)
         }
 
         binding.addLocation.setOnClickListener {
@@ -100,15 +118,19 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
         }
 
         binding.removeImageAttachment.setOnClickListener {
-            // TODO: Логика удаления фото
+            viewModel.onImageRemoved()
         }
 
         binding.topAppBar.menu.findItem(R.id.save)?.setOnMenuItemClickListener {
             val content = binding.textEvent.text?.toString()?.trim()
+            val link = binding.editEventLink.text?.toString()?.trim()
             if (content.isNullOrBlank()) {
                 binding.textEvent.error = getString(R.string.empty_field)
                 return@setOnMenuItemClickListener true
             }
+
+            viewModel.onLinkEntered(link ?: "")
+
             if (isEditMode) {
                 viewModel.updateEvent(content)
             } else {
@@ -126,15 +148,11 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
                         is NewEventUiState.Loading -> {}
                         is NewEventUiState.Ready -> {}
                         is NewEventUiState.Success -> {
-                            Toast.makeText(
-                                requireContext(),
-                                if (arguments?.getBoolean("isEditMode") == true)
-                                    getString(R.string.event_updated)
-                                else
-                                    getString(R.string.event_created),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            findNavController().navigateUp()
+                            val navController = findNavController()
+                            navController.popBackStack(R.id.mainFragment, false)
+
+                            navController.getBackStackEntry(R.id.mainFragment)
+                                .savedStateHandle.set("restoreTab", 1)
                         }
                         is NewEventUiState.Error -> {
                             Snackbar.make(
@@ -150,8 +168,33 @@ class NewEventFragment : Fragment(R.layout.fragment_new_event) {
                         is NewEventUiState.LocationRemoved -> {
                             binding.mapContainer.visibility = View.GONE
                         }
-                        is NewEventUiState.TypeSelected -> {
-                            Toast.makeText(requireContext(), "Тип: ${state.type}", Toast.LENGTH_SHORT).show()
+                        is NewEventUiState.TypeSelected -> {}
+                        is NewEventUiState.ImageSelected -> {
+                            binding.imageAttachmentContainer.visibility = View.VISIBLE
+                            binding.imageAttachment.visibility = View.VISIBLE
+                            binding.fileAttachmentPreview?.visibility = View.GONE
+                            binding.imageAttachment.load(
+                                url = state.uri.toString(),
+                                placeholder = R.drawable.ic_image_24,
+                                error = R.drawable.ic_broken_image_24
+                            )
+                        }
+                        is NewEventUiState.ImageRemoved -> {
+                            binding.imageAttachmentContainer.visibility = View.GONE
+                            binding.imageAttachment.visibility = View.GONE
+                            binding.fileAttachmentPreview?.visibility = View.GONE
+                        }
+                        is NewEventUiState.FileSelected -> {
+                            binding.imageAttachmentContainer.visibility = View.VISIBLE
+                            binding.imageAttachment.visibility = View.GONE
+                            binding.fileAttachmentPreview?.apply {
+                                visibility = View.VISIBLE
+                                text = state.fileName
+                            }
+                        }
+                        is NewEventUiState.FileRemoved -> {
+                            binding.imageAttachmentContainer.visibility = View.GONE
+                            binding.fileAttachmentPreview?.visibility = View.GONE
                         }
                     }
                 }

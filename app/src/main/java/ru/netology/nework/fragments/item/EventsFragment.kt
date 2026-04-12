@@ -19,7 +19,6 @@ import ru.netology.nework.R
 import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.databinding.FragmentEventBinding
 import ru.netology.nework.domain.model.Event
-import ru.netology.nework.domain.model.Post
 import ru.netology.nework.fragments.main.MainFragment
 import ru.netology.nework.presentation.events.EventsUiState
 import ru.netology.nework.presentation.events.EventsViewModel
@@ -47,7 +46,9 @@ class EventsFragment : Fragment(R.layout.fragment_event) {
             onLikeClick = { id, liked -> viewModel.toggleLike(id, liked) },
             onEventClick = { event -> openEventDetail(event) },
             onMenuClick = { event, anchor -> showEventMenu(event, anchor) },
-            playerManager = playerManager
+            onJoinClick = { eventId -> viewModel.toggleParticipation(eventId) },
+            playerManager = playerManager,
+            currentUserId = tokenStorage.getUserId()
         )
     }
 

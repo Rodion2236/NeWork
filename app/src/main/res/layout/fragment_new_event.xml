@@ -14,7 +14,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/new_post_menu"
         app:navigationIcon="@drawable/ic_arrow_back_24"
-        app:title="New event" />
+        app:title="@string/new_event" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -41,6 +41,22 @@
                 android:inputType="textMultiLine"
                 tools:text="@tools:sample/lorem[50]" />
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/linkInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/event_link_hint"
+                app:startIconDrawable="@drawable/ic_link_24">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editEventLink"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
             <FrameLayout
                 android:id="@+id/imageAttachmentContainer"
                 android:layout_width="match_parent"
@@ -56,6 +72,20 @@
                     android:adjustViewBounds="true"
                     android:visibility="gone"
                     tools:src="@tools:sample/avatars"
+                    tools:visibility="visible" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/fileAttachmentPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="16dp"
+                    android:gravity="center"
+                    android:drawableStart="@drawable/ic_attach_file_24"
+                    android:drawablePadding="8dp"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                    android:visibility="gone"
+                    tools:text="document.pdf"
                     tools:visibility="visible" />
 
                 <Button

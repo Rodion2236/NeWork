@@ -108,4 +108,6 @@
     <string name="failed_to_open_link">Не удалось открыть ссылку</string>
     <string name="current_job">Работаю здесь сейчас</string>
     <string name="select_users">Выберите пользователей</string>
+    <string name="new_event">Новое событие</string>
+    <string name="event_link_hint">Ссылка на онлайн-ивент</string>
 </resources>

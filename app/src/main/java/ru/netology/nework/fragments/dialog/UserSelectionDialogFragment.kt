@@ -56,7 +56,7 @@ class UserSelectionDialogFragment : BottomSheetDialogFragment(R.layout.fragment_
 
     private fun setupClicks() {
         binding.buttonConfirm.setOnClickListener {
-            setFragmentResult(BundleKeys.MENTIONS_RESULT, Bundle().apply {
+            setFragmentResult(BundleKeys.SELECTED_USER_IDS, Bundle().apply {
                 putStringArrayList(BundleKeys.SELECTED_USER_IDS, ArrayList(selectedUserIds))
             })
             dismiss()

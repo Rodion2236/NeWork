@@ -33,6 +33,11 @@
         android:label="fragment_register"
         tools:layout="@layout/fragment_register" />
     <fragment
+        android:id="@+id/eventsFragment"
+        android:name="ru.netology.nework.fragments.item.EventsFragment"
+        android:label="fragment_events"
+        tools:layout="@layout/fragment_event" />
+    <fragment
         android:id="@+id/detailPostFragment"
         android:name="ru.netology.nework.fragments.detailItem.DetailPostFragment"
         android:label="fragment_detail_post"
@@ -88,6 +93,12 @@
             android:name="isEditMode"
             app:argType="boolean"
             android:defaultValue="false" />
+        <action
+            android:id="@+id/action_newEventFragment_to_eventsFragment"
+            app:destination="@id/eventsFragment"
+            app:popUpTo="@id/eventsFragment"
+            app:popUpToInclusive="false"
+            app:launchSingleTop="true" />
     </fragment>
     <fragment
         android:id="@+id/newJobFragment"
@@ -124,4 +135,9 @@
     <action
         android:id="@+id/action_global_to_mapsFragment"
         app:destination="@id/mapsFragment" />
+    <action
+        android:id="@+id/action_global_to_eventsFragment"
+        app:destination="@id/eventsFragment"
+        app:popUpTo="@id/mainFragment"
+        app:popUpToInclusive="false" />
 </navigation>

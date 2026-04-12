@@ -117,7 +117,9 @@ class DetailEventFragment : Fragment(R.layout.fragment_detail_event) {
         binding.participantsButton.isChecked = event.participatedByMe
         binding.participantsHeader.text = getString(R.string.participants_count, event.participantsIds.size)
 
-        val speakers = event.users.filterKeys { it in event.speakerIds }.values.map { preview ->
+        val speakers = event.users.filterKeys { userId ->
+            event.speakerIds.contains(userId)
+        }.values.map { preview ->
             DomainUser(
                 id = "",
                 login = "",
@@ -127,7 +129,9 @@ class DetailEventFragment : Fragment(R.layout.fragment_detail_event) {
         }
         speakersAdapter.submitList(speakers)
 
-        val likers = event.users.values.map { preview ->
+        val likers = event.users.filterKeys { userId ->
+            event.likeOwnerIds.contains(userId)
+        }.values.map { preview ->
             DomainUser(
                 id = "",
                 login = "",
@@ -137,7 +141,9 @@ class DetailEventFragment : Fragment(R.layout.fragment_detail_event) {
         }.take(10)
         likersAdapter.submitList(likers)
 
-        val participants = event.users.filterKeys { it in event.participantsIds }.values.map { preview ->
+        val participants = event.users.filterKeys { userId ->
+            event.participantsIds.contains(userId)
+        }.values.map { preview ->
             DomainUser(
                 id = "",
                 login = "",

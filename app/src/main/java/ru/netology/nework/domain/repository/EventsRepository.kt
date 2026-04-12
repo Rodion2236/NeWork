@@ -1,5 +1,6 @@
 package ru.netology.nework.domain.repository
 
+import android.net.Uri
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import ru.netology.nework.domain.model.Event
@@ -16,7 +17,10 @@ interface EventsRepository {
         type: EventType,
         datetime: Long?,
         coords: Pair<Double, Double>?,
-        speakerIds: List<String>
+        speakerIds: List<String>,
+        link: String?,
+        imageUri: Uri? = null,
+        fileUri: Uri? = null
     ): Result<Unit>
 
     suspend fun deleteEvent(eventId: String): Result<Unit>

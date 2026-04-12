@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ru.netology.nework.data.local.TokenStorage
 import ru.netology.nework.domain.repository.EventsRepository
 import ru.netology.nework.util.BundleKeys
 import javax.inject.Inject
@@ -15,10 +16,12 @@ import javax.inject.Inject
 @HiltViewModel
 class DetailEventViewModel @Inject constructor(
     private val eventsRepository: EventsRepository,
+    private val tokenStorage: TokenStorage,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val eventId: String = savedStateHandle[BundleKeys.EVENT_ID] ?: ""
+    private val currentUserId: String? = tokenStorage.getUserId()
 
     private val _uiState = MutableStateFlow<DetailEventUiState>(DetailEventUiState.Loading)
     val uiState: StateFlow<DetailEventUiState> = _uiState.asStateFlow()
@@ -48,10 +51,20 @@ class DetailEventViewModel @Inject constructor(
                 val newLiked = !currentState.event.likedByMe
                 eventsRepository.likeEvent(currentState.event.id, newLiked)
                     .onSuccess {
+                        val updatedLikes = if (newLiked) {
+                            if (currentUserId != null && !currentState.event.likeOwnerIds.contains(currentUserId)) {
+                                currentState.event.likeOwnerIds + currentUserId
+                            } else currentState.event.likeOwnerIds
+                        } else {
+                            currentUserId?.let {
+                                currentState.event.likeOwnerIds.filter { id -> id != it }
+                            } ?: currentState.event.likeOwnerIds
+                        }
+
                         val updatedEvent = currentState.event.copy(
                             likedByMe = newLiked,
-                            likeOwnerIds = if (newLiked) currentState.event.likeOwnerIds + ""
-                            else currentState.event.likeOwnerIds.dropLast(1)
+                            likeCount = updatedLikes.size,
+                            likeOwnerIds = updatedLikes
                         )
                         _uiState.value = DetailEventUiState.Success(updatedEvent)
                     }
@@ -70,10 +83,19 @@ class DetailEventViewModel @Inject constructor(
                     eventsRepository.leaveEvent(currentState.event.id)
                 }
                 result.onSuccess {
+                    val updatedParticipants = if (newParticipated) {
+                        if (currentUserId != null && !currentState.event.participantsIds.contains(currentUserId)) {
+                            currentState.event.participantsIds + currentUserId
+                        } else currentState.event.participantsIds
+                    } else {
+                        currentUserId?.let {
+                            currentState.event.participantsIds.filter { id -> id != it }
+                        } ?: currentState.event.participantsIds
+                    }
+
                     val updatedEvent = currentState.event.copy(
                         participatedByMe = newParticipated,
-                        participantsIds = if (newParticipated) currentState.event.participantsIds + ""
-                        else currentState.event.participantsIds.dropLast(1)
+                        participantsIds = updatedParticipants
                     )
                     _uiState.value = DetailEventUiState.Success(updatedEvent)
                 }
